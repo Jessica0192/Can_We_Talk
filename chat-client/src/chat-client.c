@@ -1,63 +1,45 @@
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#define MAX 80
-#define PORT 8080
-#define SA struct sockaddr
+/*
+*
+*	FILE: chat-client.c
+*	PROJECT: A3
+*	PROGRAMMER: Suka Sun
+*	FIRST VERSION: 2021-03-20
+*	DESCRIPTION: TBD
+*
+*/
 
-void func(int client_socket)
-{
-    char buff[MAX];
-    int n;
-    for (;;) {
-        bzero(buff, sizeof(buff));
-				sleep(10);
-        printf("Enter the string : ");
-        n = 0;
-        while ((buff[n++] = getchar()) != '\n')
-            ;
-        write(client_socket, buff, sizeof(buff));
-        bzero(buff, sizeof(buff));
-        read(client_socket, buff, sizeof(buff));
-        printf("From Server : %s", buff);
-        if ((strncmp(buff, "exit", 4)) == 0) {
-            printf("Client Exit...\n");
-            break;
-        }
-    }
-}
+#include "../inc/chat-client.h"
+#include "../inc/chat-client-helpers.h"
 
 int main()
 {
-    int client_socket, connfd;
-    struct sockaddr_in servaddr, cli;
+		pthread_t  pInc, pOut;
 
-    // socket create and varification
-    if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        printf("socket creation failed...\n");
-        exit(0);
-    }
-    printf("Socket successfully created..\n");
-    bzero(&servaddr, sizeof(servaddr));
-
-    // assign IP, PORT
+    struct sockaddr_in servaddr;
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     servaddr.sin_port = htons(PORT);
 
-    // connect the client socket to server socket
-    if (connect(client_socket, (SA*)&servaddr, sizeof(servaddr)) != 0) {
-        printf("connection with the server failed...\n");
-        exit(0);
-    }
+		// Create and launch clientIncomingThread
+		if (pthread_create(&pInc, NULL, clientIncomingThread, (void *)&servaddr))
+		{
+			printf ("[CLIENT] : clientIncomingThread FAILED\n");
+			fflush(stdout);
+		}
 
-		printf("connected to the server..\n");
+		// Create and launch clientOutGoingThread
+		if (pthread_create(&pOut, NULL, clientOutGoingThread, (void *)&servaddr))
+		{
+			printf ("[CLIENT] : clientOutGoingThread FAILED\n");
+			fflush(stdout);
+		}
 
-    // function for chat
-    func(client_socket);
+		// Waiting for a thread
+		printf("Waiting for threads to exit... \n");
+		int* ptr;
+		pthread_join(pInc, &ptr);
+		pthread_join(pOut, &ptr);
 
-    // close the socket
-    close(client_socket);
+    printf("DONE \n");
+
 }

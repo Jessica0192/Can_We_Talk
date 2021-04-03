@@ -3,23 +3,22 @@
 # PROJECT: A3
 # PROGRAMMER: Suka Sun
 # FIRST VERSION: 2021-03-20
-# DESCRIPTION: This file is a Makefile to compile all the source codes. It also has ability to
-# clean bin and obj directory
-# this makefile will compile and and all source
-# found in the "DR" directory.  This represents a sample
-# development directory structure and project
+# DESCRIPTION: TBD
 #
 # =======================================================
 #                  DR Example
 # =======================================================
 # FINAL BINARY Target
-./bin/chat-client :	./obj/chat-client.o
-	cc ./obj/chat-client.o -o ./bin/chat-client -lpthread
+./bin/chat-client :	./obj/chat-client.o ./obj/chat-client-helpers.o
+	cc ./obj/chat-client.o ./obj/chat-client-helpers.o -o ./bin/chat-client -lpthread
 # =======================================================
 #                     Dependencies
 # =======================================================
-./obj/chat-client.o : ./src/chat-client.c
+./obj/chat-client.o : ./src/chat-client.c ./inc/chat-client.h
 	cc -c ./src/chat-client.c -o ./obj/chat-client.o -lpthread
+
+./obj/chat-client-helpers.o : ./src/chat-client-helpers.c ./inc/chat-client-helpers.h
+	cc -c ./src/chat-client-helpers.c -o ./obj/chat-client-helpers.o -lpthread
 
 #
 # =======================================================
