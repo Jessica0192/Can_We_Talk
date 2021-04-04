@@ -9,8 +9,8 @@
 #                  DR Example
 # =======================================================
 # FINAL BINARY Target
-./bin/chat-client :	./obj/chat-client.o ./obj/chat-client-helpers.o
-	cc ./obj/chat-client.o ./obj/chat-client-helpers.o -o ./bin/chat-client -lpthread
+./bin/chat-client :	./obj/chat-client.o ./obj/chat-client-helpers.o ./obj/chat-client-ncurses.o
+	cc ./obj/chat-client.o ./obj/chat-client-helpers.o ./obj/chat-client-ncurses.o -o ./bin/chat-client -lpthread -lncurses
 # =======================================================
 #                     Dependencies
 # =======================================================
@@ -19,6 +19,9 @@
 
 ./obj/chat-client-helpers.o : ./src/chat-client-helpers.c ./inc/chat-client-helpers.h
 	cc -c ./src/chat-client-helpers.c -o ./obj/chat-client-helpers.o -lpthread
+
+./obj/chat-client-ncurses.o : ./src/chat-client-ncurses.c ./inc/chat-client-ncurses.h
+	cc -c ./src/chat-client-ncurses.c -o ./obj/chat-client-ncurses.o -lpthread -lncurses
 
 #
 # =======================================================

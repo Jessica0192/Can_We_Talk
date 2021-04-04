@@ -8,21 +8,24 @@
 *
 */
 
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <stdbool.h>
+// #include <netdb.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <sys/socket.h>
+// #include <pthread.h>
+// #include <unistd.h>
+// #include <arpa/inet.h>
+// #include <stdbool.h>
+// #include <ncurses.h>
 
-#define MAX 80
-#define PORT 8080
-#define SA struct sockaddr
+#include "../inc/common.h"
+// 
+// #define MAX 80
+// #define PORT 8080
+// #define SA struct sockaddr
 
-int create_socket(void *servaddr);
-void * clientIncomingThread(void *servaddr);
-void * clientOutGoingThread(void *servaddr);
+int create_socket(struct sockaddr_in servaddr);
+void * clientIncomingThread(ClientInfoDef *clientInfo);
+void * clientOutGoingThread(ClientInfoDef *clientInfo);
 void func(int client_socket);
