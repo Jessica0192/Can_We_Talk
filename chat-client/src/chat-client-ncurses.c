@@ -54,22 +54,21 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
 // void * monitorInputWindow(void *client_input_window)
 void * monitorInputWindow(ClientInfoDef* clientInfo)
 {
-  // int index = 0;
-  // char *input = (char *)malloc(200);
-  // while (true)
-  // {
-  //   // wgetnstr(clientInfo->client_input_window, input, sizeof(input));
-  //   // wclear(clientInfo->client_input_window);
-  //   index = index + 1;
-  //   refresh();
-  //   sleep(2);
-  // }
+  int index = 0;
+  char *input = (char *)malloc(81);
+  while (true)
+  {
+    wgetnstr(clientInfo->client_input_window, input, 80);
+    wclear(clientInfo->client_input_window);
+    index = index + 1;
+    wrefresh(clientInfo->client_input_window);
+    // sleep(2);
+  }
 }
 
 
 void * open_ui(ClientInfoDef * clientInfo)
 {
-
 
   printf("[open_ui] %p \n", (uintptr_t)clientInfo);
   initscr();			/* Start curses mode 		  */
@@ -81,12 +80,6 @@ void * open_ui(ClientInfoDef * clientInfo)
   clientInfo->client_msg_window = newwin(parent_y - client_input_window_size, parent_x, 0, 0);
   clientInfo->client_input_window = newwin(client_input_window_size, parent_x, parent_y - client_input_window_size, 2);
 
-  // WINDOW *client_input_window = newwin(client_input_window_size, parent_x, parent_y - client_input_window_size, 2);
-
-
-  // sleep(2);
-
-  // wclear(clientInfo->client_msg_window);
 
   // client_msg_window
   pthread_t  pMsg, pInput;
@@ -96,28 +89,16 @@ void * open_ui(ClientInfoDef * clientInfo)
     fflush(stdout);
   }
 
-  // // client_input_window
-  // if (pthread_create(&pInput, NULL, monitorInputWindow, clientInfo))
-  // {
-  //   printf ("[CLIENT] : pInput\n");
-  //   fflush(stdout);
-  // }
-
-
-  int index = 0;
-  char *input = (char *)malloc(81);
-  while (true)
+  // client_input_window
+  if (pthread_create(&pInput, NULL, monitorInputWindow, clientInfo))
   {
-    wgetnstr(clientInfo->client_input_window, input, 80);
-    wclear(clientInfo->client_input_window);
-    index = index + 1;
-    wrefresh(clientInfo->client_input_window);
-    // sleep(2);
+    printf ("[CLIENT] : pInput\n");
+    fflush(stdout);
   }
 
   int* ptr;
   pthread_join(pMsg, &ptr);
-  // pthread_join(pInput, &ptr);
+  pthread_join(pInput, &ptr);
   printf("DONE \n");
 
 
