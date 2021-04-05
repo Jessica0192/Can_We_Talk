@@ -13,4 +13,4 @@
 
 #include "../inc/common.h"
 
-void open_ui(ClientInfoDef clientInfo);
+void open_ui(ClientInfoDef *clientInfo);

@@ -34,57 +34,22 @@ int create_socket(struct sockaddr_in servaddr)
 void * clientIncomingThread(ClientInfoDef *clientInfo)
 {
 	int client_socket = create_socket(clientInfo->servaddr);
-	// printf("In clientIncomingThread = %d\n", client_socket);
-
-	// Create a new message queue
-	key_t msg_key = ftok("./test", 0);
-	if(msg_key == -1)
-	{
-		printf ("Cannot get msg_key\n");
-		exit(1);
-	}
-	int msg_id = -1;
-	if((msg_id = msgget(msg_key, 0)) == -1)
-	{
-		msg_id = msgget(msg_key, IPC_CREAT | 0660);
-		if(msg_id == -1)
-		{
-			fflush(stdout);
-			printf ("Cannot get msg_id ... \n");
-			exit(1);
-		}
-		sleep(1);
-	}
-
-	clientInfo->msg_id = msg_id;
-
-	printf ("----- clientInfo->msg_id - (%d) \n", clientInfo->msg_id);
-	sleep(1);
 
 	struct myMsg msg;
 	while (true)
 	{
-			// sendMsg(clientInfo->msg_id);
-			// // int msg_size = sizeof(msg) - sizeof(long);
-			// int msg_size = sizeof(msg);
-			// msg.text = {"test"};
 			msg.type = 1;
-
 			char str[20];
 			sprintf(str, " - %d", (rand() % (30 - 10 + 1)) + 10);
 			strncpy(msg.text, "hello", 20);
 			strcat(msg.text,str);
-			int rtn_code = msgsnd(msg_id, (void *) &msg, sizeof(msg.text), IPC_NOWAIT);
-
-			// To handle if not able to send a message
+			// int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), IPC_NOWAIT);
+			int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), 0);
 			if (rtn_code == -1)
 			{
-				printf ("xxSend msg failed - (%d-%d) - %d \n", msg_id,clientInfo->msg_id,  rtn_code);
+				printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msg_id,  rtn_code);
+				exit(1);
 			}
-			// else
-			// {
-			// 	printf ("Send msg passed: (%d--%d) - %s \n", msg_id, clientInfo->msg_id, msg.text);
-			// }
 			sleep(2);
 	}
 	// close the socket
@@ -121,33 +86,3 @@ void func(int client_socket)
         }
     }
 }
-
-int sendMsg(int msgID)
-{
-	struct myMsg msg;
-	int msg_size = sizeof(msg) - sizeof(long);
-
-	// msg.status = (rand() % (30 - 10 + 1)) + 10;
-
-	printf ("Send msg %s - %d \n", msg.text, msgID);
-
-	int rtn_code = msgsnd(msgID, &msg, msg_size, 0);
-
-	// To handle if not able to send a message
-	if (rtn_code == -1)
-	{
-		return 1;
-	}
-	return 0;
-}
-
-
-// bool send_msg(char user[], char message[])
-// {
-// 	return true;
-// }
-//
-// char *receive_msg(int count) {
-//   char msg[MAX] = {"Hello World"};
-// 	return buff
-// }

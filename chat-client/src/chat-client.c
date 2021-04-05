@@ -18,12 +18,32 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo);
 int main()
 {
 		// pthread_t  pInc, pOut;
-		static ClientInfoDef clientInfo;
-
+		ClientInfoDef clientInfo;
+		clientInfo.type = 312;
     clientInfo.servaddr.sin_family = AF_INET;
     clientInfo.servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     clientInfo.servaddr.sin_port = htons(PORT);
+		clientInfo.msg_size = sizeof(clientInfo.srvMsgRec) - sizeof(long);
+		clientInfo.msg_id = -1;
 
+		// Create a new message queue
+		key_t msg_key = ftok("./test2", 0);
+		if(msg_key == -1)
+		{
+			printf ("Cannot get msg_key\n");
+			exit(1);
+		}
+		if((clientInfo.msg_id = msgget(msg_key, 0)) == -1)
+		{
+			clientInfo.msg_id = msgget(msg_key, IPC_CREAT | 0660);
+			if(clientInfo.msg_id == -1)
+			{
+				fflush(stdout);
+				printf ("Cannot get clientInfo.msg_id ... \n");
+				exit(1);
+			}
+			sleep(1);
+		}
 
 		// Create and launch clientIncomingThread
 		if (pthread_create(&(clientInfo.pInc), NULL, clientIncomingThread, &clientInfo))
@@ -40,7 +60,7 @@ int main()
 		}
 
 		// Open UI
-		open_ui(clientInfo);
+		open_ui(&clientInfo);
 
 		// Waiting for a thread
 		printf("Waiting for threads to exit... \n");

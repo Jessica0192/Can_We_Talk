@@ -24,6 +24,12 @@
 #define PORT 8080
 #define SA struct sockaddr
 
+struct myMsg
+{
+	long type;
+	char text[20];
+};
+
 typedef struct
 {
 	// the following is a requriement of UNIX/Linux
@@ -31,6 +37,8 @@ typedef struct
   pthread_t  pInc;
   pthread_t  pOut;
   struct sockaddr_in servaddr;
+  struct myMsg srvMsgRec;
+  int msg_size ;
   WINDOW *client_msg_window;
   WINDOW *client_input_window;
 	int msg_id;
@@ -38,11 +46,7 @@ typedef struct
 } ClientInfoDef;
 
 
-struct myMsg
-{
-	long type;
-	char text[20];
-};
+
 
 // Send message
 int sendMsg(int id);
