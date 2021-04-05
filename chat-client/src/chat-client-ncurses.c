@@ -80,7 +80,6 @@ void * open_ui(ClientInfoDef * clientInfo)
   clientInfo->client_msg_window = newwin(parent_y - client_input_window_size, parent_x, 0, 0);
   clientInfo->client_input_window = newwin(client_input_window_size, parent_x, parent_y - client_input_window_size, 2);
 
-
   // client_msg_window
   pthread_t  pMsg, pInput;
   if (pthread_create(&pMsg, NULL, monitorMsgWindow, clientInfo))
@@ -100,7 +99,6 @@ void * open_ui(ClientInfoDef * clientInfo)
   pthread_join(pMsg, &ptr);
   pthread_join(pInput, &ptr);
   printf("DONE \n");
-
 
 	refresh();			/* Print it on to the real screen */
 	getch();			/* Wait for user input */

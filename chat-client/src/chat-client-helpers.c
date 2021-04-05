@@ -70,24 +70,24 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
 	close(client_socket);
 }
 
-void func(int client_socket)
-{
-    char buff[MAX];
-    int n;
-    for (;;) {
-        bzero(buff, sizeof(buff));
-				sleep(10);
-        printf("Enter the string : ");
-        n = 0;
-        while ((buff[n++] = getchar()) != '\n')
-            ;
-        write(client_socket, buff, sizeof(buff));
-        bzero(buff, sizeof(buff));
-        read(client_socket, buff, sizeof(buff));
-        printf("From Server : %s", buff);
-        if ((strncmp(buff, "exit", 4)) == 0) {
-            printf("Client Exit...\n");
-            break;
-        }
-    }
-}
+// void func(int client_socket)
+// {
+//     char buff[MAX];
+//     int n;
+//     for (;;) {
+//         bzero(buff, sizeof(buff));
+// 				sleep(10);
+//         printf("Enter the string : ");
+//         n = 0;
+//         while ((buff[n++] = getchar()) != '\n')
+//             ;
+//         write(client_socket, buff, sizeof(buff));
+//         bzero(buff, sizeof(buff));
+//         read(client_socket, buff, sizeof(buff));
+//         printf("From Server : %s", buff);
+//         if ((strncmp(buff, "exit", 4)) == 0) {
+//             printf("Client Exit...\n");
+//             break;
+//         }
+//     }
+// }
