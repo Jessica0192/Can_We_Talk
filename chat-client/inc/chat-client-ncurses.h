@@ -13,4 +13,6 @@
 
 #include "../inc/common.h"
 
-void open_ui(ClientInfoDef *clientInfo);
+void * open_ui(ClientInfoDef *clientInfo);
+void * monitorMsgWindow(ClientInfoDef* clientInfo);
+void * monitorInputWindow(ClientInfoDef* clientInfo);

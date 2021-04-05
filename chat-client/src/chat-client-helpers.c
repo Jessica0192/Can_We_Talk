@@ -33,6 +33,11 @@ int create_socket(struct sockaddr_in servaddr)
 
 void * clientIncomingThread(ClientInfoDef *clientInfo)
 {
+
+	printf("[Sender] %p \n", (uintptr_t)clientInfo);
+	printf("[Sender] clientInfo->type = %d \n", clientInfo->type);
+	printf("[Sender] clientInfo->msg_id = %d \n", clientInfo->msg_id);
+
 	int client_socket = create_socket(clientInfo->servaddr);
 
 	struct myMsg msg;

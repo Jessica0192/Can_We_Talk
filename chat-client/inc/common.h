@@ -45,8 +45,5 @@ typedef struct
 
 } ClientInfoDef;
 
-
-
-
 // Send message
 int sendMsg(int id);

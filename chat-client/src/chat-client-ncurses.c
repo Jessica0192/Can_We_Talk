@@ -13,6 +13,11 @@
 // void * monitorMsgWindow(void *client_msg_window)
 void * monitorMsgWindow(ClientInfoDef* clientInfo)
 {
+
+  printf("[Receiver] %p \n", (uintptr_t)clientInfo);
+  printf("[Receiver] clientInfo->type = %d \n", clientInfo->type);
+  printf("[Receiver] clientInfo->msg_id = %d \n", clientInfo->msg_id);
+
   int index = 0;
   struct myMsg xx;
   int msg_size = sizeof(xx) - sizeof(long);
@@ -22,8 +27,11 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
     int rtn = msgrcv(clientInfo->msg_id, &xx, msg_size, 1, 0);
     if( rtn  != -1 )
     {
-      mvprintw(index % 10, 1, "[%s]Message Received: %d -(%d-) %d : %s \n",
-        clientInfo->client_msg_window, clientInfo->type, clientInfo->msg_id, index, xx.text
+      mvprintw(index % 10, 1, "[%s]--Message Received: %d -(msg_id: %d) %d : %s \n",
+        clientInfo->client_msg_window,
+        clientInfo->type,
+        clientInfo->msg_id,
+        index, xx.text
       );
       index = index + 1;
     }
@@ -58,8 +66,11 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
 }
 
 
-void open_ui(ClientInfoDef * clientInfo)
+void * open_ui(ClientInfoDef * clientInfo)
 {
+
+
+  printf("[open_ui] %p \n", (uintptr_t)clientInfo);
   initscr();			/* Start curses mode 		  */
 
   int client_input_window_size = 1;
@@ -79,14 +90,14 @@ void open_ui(ClientInfoDef * clientInfo)
 
   // client_msg_window
   pthread_t  pMsg, pInput;
-  if (pthread_create(&pMsg, NULL, monitorMsgWindow, &clientInfo))
+  if (pthread_create(&pMsg, NULL, monitorMsgWindow, clientInfo))
   {
     printf ("[CLIENT] : pMsg\n");
     fflush(stdout);
   }
 
   // // client_input_window
-  // if (pthread_create(&pInput, NULL, monitorInputWindow, &clientInfo))
+  // if (pthread_create(&pInput, NULL, monitorInputWindow, clientInfo))
   // {
   //   printf ("[CLIENT] : pInput\n");
   //   fflush(stdout);

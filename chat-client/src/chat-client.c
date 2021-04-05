@@ -11,6 +11,7 @@
 #include "../inc/chat-client.h"
 void * clientIncomingThread(ClientInfoDef *clientInfo);
 void * clientOutGoingThread(ClientInfoDef *clientInfo);
+void * open_ui(ClientInfoDef *clientInfo);
 
 // #include "../inc/chat-client-helpers.h"
 // #include "../inc/chat-client-ncurses.h"
@@ -44,7 +45,7 @@ int main()
 			}
 			sleep(1);
 		}
-
+		printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientIncomingThread
 		if (pthread_create(&(clientInfo.pInc), NULL, clientIncomingThread, &clientInfo))
 		{
@@ -52,6 +53,7 @@ int main()
 			fflush(stdout);
 		}
 
+    printf("[CLIENT-2] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientOutGoingThread
 		if (pthread_create(&(clientInfo.pOut), NULL, clientOutGoingThread, &clientInfo))
 		{
@@ -59,8 +61,11 @@ int main()
 			fflush(stdout);
 		}
 
+		printf("[CLIENT-3] %p \n", (uintptr_t)&clientInfo);
 		// Open UI
 		open_ui(&clientInfo);
+
+		printf("[CLIENT-4] %p \n", (uintptr_t)&clientInfo);
 
 		// Waiting for a thread
 		printf("Waiting for threads to exit... \n");
