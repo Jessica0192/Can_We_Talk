@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <time.h>
-#define PORT 8080
+#define PORT 5000
 #define max_num_clients 10
 void *socketThread(void *clientSocket);
 typedef struct  
@@ -22,8 +22,8 @@ typedef struct
 	// the following is a requriement of UNIX/Linux
 	long type;
 
-	char IPaddress[max_num_clients];
-	char userID[max_num_clients];
+	char* IPaddress[max_num_clients];
+	char* userID[max_num_clients];
 
 	
 } serverThread;
@@ -31,11 +31,11 @@ typedef struct
 // global variable to keep count of the number of clients ...
 static int numClients = 0;
 static char* cur_IP;
-static serverThread* serv_th;
+static serverThread serv_th;
 
 int main(void)
 {
-	   serv_th = malloc(sizeof(serverThread));
+	  // serv_th = malloc(sizeof(serverThread));
 	 
 	  int                server_socket, client_socket;
 	  int                client_len;
@@ -116,8 +116,8 @@ int main(void)
 		inet_ntop(AF_INET, &(client_addr.sin_addr), str, INET_ADDRSTRLEN);
 
 		printf("%s\n", str); // prints "192.0.2.33"
-		strcpy(serv_th->IPaddress[numClients], str); //new
-		strcpy(cur_IP, serv_th->IPaddress[numClients]); //new added thing
+		serv_th.IPaddress[numClients]= str; //new
+		cur_IP = serv_th.IPaddress[numClients]; //new added thing
 
 
 		numClients++;
@@ -177,10 +177,10 @@ void *socketThread(void *clientSocket)
   read (clSocket, buffer, BUFSIZ);
 
   parsed_userID = strtok(buffer, "/");
-  strcpy(serv_th->userID[numClients - 1], parsed_userID);
+  strcpy(serv_th.userID[numClients - 1], parsed_userID);
   parsed_msg = strtok(NULL, "/");
 
- 
+ printf("hello function\n");
   
 
   while(strcmp(parsed_msg,">>bye<<") != 0)
@@ -190,11 +190,11 @@ void *socketThread(void *clientSocket)
     /* we're actually not going to execute the command - but we could if we wanted */
 
     for (int i = 0; i < numClients; i++){
-    if (serv_th->IPaddress[i] != cur_IP){
+    if (serv_th.IPaddress[i] != cur_IP){
 		
 		
-	    sprintf (message, "[%s] [%s] >> %s (%02d:%02d:%02d)", cur_IP, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	    write (serv_th->IPaddress[i], message, strlen(message));
+	    sprintf (message, "[%s] [%s] << %s (%02d:%02d:%02d)", cur_IP, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	    write (serv_th.IPaddress[i], message, strlen(message));
     }
    } 
 
