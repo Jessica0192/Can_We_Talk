@@ -14,9 +14,12 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <time.h>
+#include <signal.h>
+
 #define PORT 5000
 #define max_num_clients 10
 void *socketThread(void *clientSocket);
+void sigIntHandler(int signal);
 typedef struct  
 {
 	// the following is a requriement of UNIX/Linux
@@ -31,11 +34,12 @@ typedef struct
 // global variable to keep count of the number of clients ...
 static int numClients = 0;
 static char* cur_IP;
-static serverThread serv_th;
+static serverThread* serv_th;
+static int global_serv_socket;
 
 int main(void)
 {
-	  // serv_th = malloc(sizeof(serverThread));
+	  serv_th = (serverThread*)malloc(sizeof(serverThread));
 	 
 	  int                server_socket, client_socket;
 	  int                client_len;
@@ -43,6 +47,9 @@ int main(void)
 	  int                len, i;
 	  pthread_t	     tid[3];
 	  int                whichClient;
+
+
+signal (SIGINT, sigIntHandler);
 
 	 /*
    * obtain a socket for the server
@@ -54,6 +61,8 @@ int main(void)
 	    return 1;
 	  }
 	  printf("[SERVER] : socket() successful\n");
+
+	global_serv_socket = server_socket;
 	
 	  /*
 	   * initialize our server address info for binding purposes
@@ -116,8 +125,8 @@ int main(void)
 		inet_ntop(AF_INET, &(client_addr.sin_addr), str, INET_ADDRSTRLEN);
 
 		printf("%s\n", str); // prints "192.0.2.33"
-		serv_th.IPaddress[numClients]= str; //new
-		cur_IP = serv_th.IPaddress[numClients]; //new added thing
+		serv_th->IPaddress[numClients]= str; //new
+		cur_IP = serv_th->IPaddress[numClients]; //new added thing
 
 
 		numClients++;
@@ -162,7 +171,7 @@ void *socketThread(void *clientSocket)
   int sizeOfRead;
   int timeToExit;
   char* parsed_userID;
-  char* parsed_msg;
+  char* parsed_msg = NULL;
 
   // remap the clientSocket value (which is a void*) back into an INT
   int clSocket = *((int*)clientSocket);
@@ -177,11 +186,12 @@ void *socketThread(void *clientSocket)
   read (clSocket, buffer, BUFSIZ);
 
   parsed_userID = strtok(buffer, "/");
-  strcpy(serv_th.userID[numClients - 1], parsed_userID);
+printf("parsedUSERID: %s\n", parsed_userID);
+  serv_th->userID[numClients - 1] = parsed_userID;
   parsed_msg = strtok(NULL, "/");
 
  printf("hello function\n");
-  
+ 	 
 
   while(strcmp(parsed_msg,">>bye<<") != 0)
   {
@@ -189,12 +199,13 @@ void *socketThread(void *clientSocket)
          struct tm tm = *localtime(&t);
     /* we're actually not going to execute the command - but we could if we wanted */
 
+	printf("in function\n");
     for (int i = 0; i < numClients; i++){
-    if (serv_th.IPaddress[i] != cur_IP){
+    if (serv_th->IPaddress[i] != cur_IP){
 		
 		
 	    sprintf (message, "[%s] [%s] << %s (%02d:%02d:%02d)", cur_IP, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	    write (serv_th.IPaddress[i], message, strlen(message));
+	    write (serv_th->IPaddress[i], message, strlen(message));
     }
    } 
 
@@ -219,6 +230,21 @@ void *socketThread(void *clientSocket)
 
 
 
+/*
+* FUNCTION: sigIntHandler
+* PURPOSE: The function takes signal number which is raised. This function is called when SIGINT signal is raised
+* and it deattach from shared-memory
+* PARAMETER: int signal - signal number which is raised
+* RETURNS: void - there's no return value
+*/
+void sigIntHandler(int signal)
+{
 
+      	// disable CTRL-C support! but only 3 times max!
+	printf ("SIGINT IN CHAT-SERVER\n");
+
+      	close (global_serv_socket);
+	exit(1);
+}
 
 
