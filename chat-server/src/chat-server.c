@@ -25,7 +25,7 @@ typedef struct
 	// the following is a requriement of UNIX/Linux
 	long type;
 
-	char* IPaddress[max_num_clients];
+	int IPaddress[max_num_clients];
 	char* userID[max_num_clients];
 
 	
@@ -33,7 +33,7 @@ typedef struct
 
 // global variable to keep count of the number of clients ...
 static int numClients = 0;
-static char* cur_IP;
+static int cur_IP;
 static serverThread* serv_th;
 static int global_serv_socket;
 
@@ -47,7 +47,6 @@ int main(void)
 	  int                len, i;
 	  pthread_t	     tid[3];
 	  int                whichClient;
-
 
 signal (SIGINT, sigIntHandler);
 
@@ -125,7 +124,7 @@ signal (SIGINT, sigIntHandler);
 		inet_ntop(AF_INET, &(client_addr.sin_addr), str, INET_ADDRSTRLEN);
 
 		printf("%s\n", str); // prints "192.0.2.33"
-		serv_th->IPaddress[numClients]= str; //new
+		serv_th->IPaddress[numClients]= client_socket; //new
 		cur_IP = serv_th->IPaddress[numClients]; //new added thing
 
 
@@ -153,6 +152,23 @@ signal (SIGINT, sigIntHandler);
 
 
 	  }
+
+	for(int i=0; i<numClients; i++)
+	  {
+		printf("JOINING\n");
+		if(pthread_join(tid[i], (void *)(&whichClient)))
+		{
+		   printf("[SERVER] : pthread_join() FAILED\n");
+		   return 6;
+		}
+		printf("\n[SERVER] : received QUIT command from CLIENT-%02d\n", whichClient);
+	  }
+
+	if(numClients == 0)
+	{
+		printf("\n[SERVER] : All clients have returned - exiting ...\n");
+  		close (server_socket);
+	}
 
 	return 0;
 }
@@ -188,8 +204,8 @@ void *socketThread(void *clientSocket)
   parsed_userID = strtok(buffer, "/");
 printf("parsedUSERID: %s\n", parsed_userID);
   serv_th->userID[numClients - 1] = parsed_userID;
-  parsed_msg = strtok(NULL, "/");
-
+  //parsed_msg = strtok(NULL, "/");
+  parsed_msg = parsed_userID;
  printf("hello function\n");
  	 
 
@@ -200,21 +216,22 @@ printf("parsedUSERID: %s\n", parsed_userID);
     /* we're actually not going to execute the command - but we could if we wanted */
 
 	printf("in function\n");
+	printf("numCleints: %d\n", numClients);
+	sprintf (message, "[%d] [%s] << %s (%02d:%02d:%02d)", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
     for (int i = 0; i < numClients; i++){
-    if (serv_th->IPaddress[i] != cur_IP){
-		
-		
-	    sprintf (message, "[%s] [%s] << %s (%02d:%02d:%02d)", cur_IP, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	    write (serv_th->IPaddress[i], message, strlen(message));
-    }
+	    if (serv_th->IPaddress[i] != clSocket){
+		printf("WRITING!!!!!! [%d]\n", clSocket);
+		   printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		    write (serv_th->IPaddress[i], message, strlen(message));
+	    }
    } 
-
     // clear out and get the next command and process
     memset(buffer,0,BUFSIZ);
+    memset(message,0,sizeof(message));
     read (clSocket, buffer, BUFSIZ);
   }
 
-  
+  printf("CLOSE@@@\n");
   close(clSocket);
   
   // decrement the number of clients
