@@ -31,7 +31,7 @@ int main()
 		key_t msg_key = ftok("./test2", 0);
 		if(msg_key == -1)
 		{
-			printf ("Cannot get msg_key\n");
+			//printf ("Cannot get msg_key\n");
 			exit(1);
 		}
 		if((clientInfo.msg_id = msgget(msg_key, 0)) == -1)
@@ -40,38 +40,38 @@ int main()
 			if(clientInfo.msg_id == -1)
 			{
 				fflush(stdout);
-				printf ("Cannot get clientInfo.msg_id ... \n");
+				//printf ("Cannot get clientInfo.msg_id ... \n");
 				exit(1);
 			}
 			sleep(1);
 		}
-		printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
+		//printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientIncomingThread
 		if (pthread_create(&(clientInfo.pInc), NULL, clientIncomingThread, &clientInfo))
 		{
-			printf ("[CLIENT] : clientIncomingThread FAILED\n");
+			//printf ("[CLIENT] : clientIncomingThread FAILED\n");
 			fflush(stdout);
 		}
 
-    printf("[CLIENT-2] %p \n", (uintptr_t)&clientInfo);
+//    printf("[CLIENT-2] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientOutGoingThread
 		if (pthread_create(&(clientInfo.pOut), NULL, clientOutGoingThread, &clientInfo))
 		{
-			printf ("[CLIENT] : clientOutGoingThread FAILED\n");
+			//printf ("[CLIENT] : clientOutGoingThread FAILED\n");
 			fflush(stdout);
 		}
 
-		printf("[CLIENT-3] %p \n", (uintptr_t)&clientInfo);
+		//printf("[CLIENT-3] %p \n", (uintptr_t)&clientInfo);
 		// Open UI
 		open_ui(&clientInfo);
 
-		printf("[CLIENT-4] %p \n", (uintptr_t)&clientInfo);
+		//printf("[CLIENT-4] %p \n", (uintptr_t)&clientInfo);
 
 		// Waiting for a thread
-		printf("Waiting for threads to exit... \n");
+		//printf("Waiting for threads to exit... \n");
 		int* ptr;
 		pthread_join(clientInfo.pInc, &ptr);
 		pthread_join(clientInfo.pOut, &ptr);
 
-    printf("DONE \n");
+   // printf("DONE \n");
 }
