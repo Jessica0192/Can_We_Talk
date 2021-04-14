@@ -18,10 +18,10 @@ int create_socket(struct sockaddr_in servaddr)
 			//printf("socket creation failed...\n");
 			exit(0);
 	}
-	// printf("Socket successfully created..\n");
+	printf("Socket successfully created..\n");
 	bzero(&servaddr, sizeof(servaddr));
 
-	// printf("Connected to the server..\n");
+	printf("Connected to the server..\n");
 
 	// cientIncomingThread
 	if (connect(client_socket, (SA*)&servaddr, sizeof(servaddr)) != 0) {
@@ -63,9 +63,27 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 
 void * clientOutGoingThread(ClientInfoDef *clientInfo)
 {
-	int client_socket = create_socket(clientInfo->servaddr);
-	// printf("In clientOutGoingThread = %d\n", client_socket);
+	// int client_socket = create_socket(clientInfo->servaddr);
+	printf("xxxxIn clientOutGoingThread = %d\n", client_socket);
+  printf("%d\n", clientInfo->servaddr);
+  // int MAX = 512;
+  char buff[MAX];
+  int n;
 
+  bzero(buff, sizeof(buff));
+  printf("Enter the string : ");
+  n = 0;
+  while ((buff[n++] = getchar()) != '\n')
+    ;
+  printf("Input received\n");
+
+  write(client_socket, buff, sizeof(buff));
+  printf("Input sent\n");
+  bzero(buff, sizeof(buff));
+  printf("Sent, read response now ...");
+  read(client_socket, buff, sizeof(buff));
+  printf("From Server : %s", buff);
+  sleep(10);
 	// close the socket
 	close(client_socket);
 }
