@@ -48,55 +48,67 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   memcpy (&server_addr.sin_addr, host->h_addr, host->h_length);
   server_addr.sin_port = htons (5000);
 
-     /*
-      * get a socket for communications
-      */
-printf ("[CLIENT-%d] : Getting STREAM Socket to talk to SERVER\n", whichClient);
-fflush(stdout);
-     if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
-     {
-       printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
-       return NULL;
-     }
+  /*
+  * get a socket for communications
+  */
+  // printf ("[CLIENT-%d] : Getting STREAM Socket to talk to SERVER\n", whichClient);
+  fflush(stdout);
+  if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+  {
+    printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
+    return NULL;
+  }
 
      /*
       * attempt a connection to server
       */
-printf ("[CLIENT-%d] : Connecting to SERVER\n", whichClient);
-fflush(stdout);
-     if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
-     {
-       printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
-       close (client_socket);
-       return NULL;
-     }
+  // printf ("[CLIENT-%d] : Connecting to SERVER\n", whichClient);
+  fflush(stdout);
+  if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
+  {
+    printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
+    close (client_socket);
+    return NULL;
+  }
 
 
-     // int client_socket = create_socket(clientInfo->servaddr);
-   	// printf("xxxxIn clientOutGoingThread = %d\n", client_socket);
-     printf("%d\n", clientInfo->servaddr);
-     // int MAX = 512;
-     char buff[MAX];
-     char * msg = {"000/dummy"};
-     int n;
+   // int client_socket = create_socket(clientInfo->servaddr);
+ 	// printf("xxxxIn clientOutGoingThread = %d\n", client_socket);
+   // printf("%d\n", clientInfo->servaddr);
+   // int MAX = 512;
+   char buff[MAX];
+   char * tmpmsg = {"000/dummy"};
+   int n;
 
-     for (;;) {
-       // bzero(buff, sizeof(buff));
-       // printf("Enter the string : ");
-       // n = 0;
-       // while ((buff[n++] = getchar()) != '\n')
-       //   ;
-       // printf("[Incoming] Input received\n");
+   struct myMsg msg;
 
-       sleep(1);
-       write(client_socket, msg, sizeof(msg));
-       printf("[Incoming] Input sent, socket: %d\n", client_socket);
-       bzero(buff, sizeof(buff));
-       printf("[Incoming] Sent, read response now ...\n");
-       read(client_socket, buff, sizeof(buff));
-       printf("[Incoming] From Server : %s\n", buff);
+   for (;;) {
+     // bzero(buff, sizeof(buff));
+     // printf("Enter the string : ");
+     // n = 0;
+     // while ((buff[n++] = getchar()) != '\n')
+     //   ;
+     // printf("[Incoming] Input received\n");
 
-     }
+      sleep(1);
+      write(client_socket, tmpmsg, sizeof(tmpmsg));
+      // printf("[Incoming] Input sent, socket: %d\n", client_socket);
+      bzero(buff, sizeof(buff));
+      // printf("[Incoming] Sent, read response now ...\n");
+      read(client_socket, buff, sizeof(buff));
+
+      strncpy(msg.text, buff, sizeof(buff));
+      // strcat(msg.text, str);
+      int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), 0);
+      if (rtn_code == -1)
+      {
+        printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msg_id,  rtn_code);
+        // exit(1);
+      }
+
+     // printf("[Incoming] From Server : %s\n", buff);
+
+   }
 
 	//printf("[Sender] %p \n", (uintptr_t)clientInfo);
 	//printf("[Sender] clientInfo->type = %d \n", clientInfo->type);
@@ -147,48 +159,53 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
      /*
       * get a socket for communications
       */
-printf ("[CLIENT-%d] : Getting STREAM Socket to talk to SERVER\n", whichClient);
-fflush(stdout);
-     if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
-     {
-       printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
-       return NULL;
-     }
+  // printf ("[CLIENT-%d] : Getting STREAM Socket to talk to SERVER\n", whichClient);
+  fflush(stdout);
+  if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+  {
+     printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
+     return NULL;
+  }
 
      /*
       * attempt a connection to server
       */
-printf ("[CLIENT-%d] : Connecting to SERVER\n", whichClient);
-fflush(stdout);
-     if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
-     {
-       printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
-       close (client_socket);
-       return NULL;
-     }
+  // printf ("[CLIENT-%d] : Connecting to SERVER\n", whichClient);
+  fflush(stdout);
+  if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
+  {
+     printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
+     close (client_socket);
+     return NULL;
+  }
 
 	// int client_socket = create_socket(clientInfo->servaddr);
 	// printf("xxxxIn clientOutGoingThread = %d\n", client_socket);
-  printf("%d\n", clientInfo->servaddr);
+  // printf("%d\n", clientInfo->servaddr);
   // int MAX = 512;
   char buff[MAX];
   int n;
 
   for (;;) {
-    bzero(buff, sizeof(buff));
-    printf("[OutGoing-%d] Enter the string : ", client_socket);
-    n = 0;
-    while ((buff[n++] = getchar()) != '\n')
-      ;
-    printf("[OutGoing] Input received\n");
+    // bzero(buff, sizeof(buff));
+    // printf("[OutGoing-%d] Enter the string : ", client_socket);
+    // n = 0;
+    // while ((buff[n++] = getchar()) != '\n')
+    //   ;
+    // printf("[OutGoing] Input received\n");
+
+		char str[20];
+		sprintf(str, " - %d", (rand() % (30 - 10 + 1)) + 10);
+		strncpy(buff, "hello", 20);
+		strcat(buff,str);
 
     write(client_socket, buff, sizeof(buff));
-    printf("[OutGoing] Input sent, socket: %d\n", client_socket);
+    // printf("[OutGoing] Input sent, socket: %d\n", client_socket);
     bzero(buff, sizeof(buff));
-    printf("[OutGoing] Sent, read response now ...\n");
+    // printf("[OutGoing] Sent, read response now ...\n");
     read(client_socket, buff, sizeof(buff));
-    printf("[OutGoing] From Server : %s\n", buff);
-    // sleep(10);
+    // printf("[OutGoing] From Server : %s\n", buff);
+    sleep(10);
   }
 
 	// close the socket

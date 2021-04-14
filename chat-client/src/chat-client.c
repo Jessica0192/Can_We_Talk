@@ -63,7 +63,7 @@ int main()
 
 		//printf("[CLIENT-3] %p \n", (uintptr_t)&clientInfo);
 		// Open UI
-		// open_ui(&clientInfo);
+		open_ui(&clientInfo);
 
 		//printf("[CLIENT-4] %p \n", (uintptr_t)&clientInfo);
 
