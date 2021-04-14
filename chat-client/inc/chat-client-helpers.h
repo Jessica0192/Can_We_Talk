@@ -10,6 +10,9 @@
 
 #include "../inc/common.h"
 
+#include <stdio.h>
+#include <netdb.h>
+
 int create_socket(struct sockaddr_in servaddr);
 void * clientIncomingThread(ClientInfoDef *clientInfo);
 void * clientOutGoingThread(ClientInfoDef *clientInfo);
