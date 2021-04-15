@@ -29,5 +29,5 @@
 # =======================================================
 all : ./bin/chat-client
 clean:
-	rm -rf ./bin/*
+	rm -rf ./bin/chat*
 	rm -f ./obj/*.o
