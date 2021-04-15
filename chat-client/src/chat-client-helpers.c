@@ -82,6 +82,7 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 
    struct myMsg msg;
 
+
    for (;;) {
      // bzero(buff, sizeof(buff));
      // printf("Enter the string : ");
@@ -98,6 +99,7 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
       read(client_socket, buff, sizeof(buff));
 
       strncpy(msg.text, buff, sizeof(buff));
+      msg.type = 1;
       // strcat(msg.text, str);
       int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), 0);
       if (rtn_code == -1)
