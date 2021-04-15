@@ -119,7 +119,6 @@ int main(int argc,char* argv[])
     fprintf(clientInfo.log, "[Main] msgIdUIRec=%d, msgIdUISnd=%d\n", clientInfo.msgIdUIRec, clientInfo.msgIdUISnd);
     fflush(clientInfo.log);
 
-		//printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientIncomingThread
 		if (pthread_create(&(clientInfo.pInc), NULL, clientIncomingThread, &clientInfo))
 		{
@@ -143,7 +142,6 @@ int main(int argc,char* argv[])
 
 		// Open UI
 		open_ui(&clientInfo);
-
 
 		// Waiting for threads
 		int* ptr;

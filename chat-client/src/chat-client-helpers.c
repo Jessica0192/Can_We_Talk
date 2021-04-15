@@ -53,6 +53,8 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
       write(client_socket, tmpmsg, sizeof(tmpmsg));
       bzero(buff, sizeof(buff));
       read(client_socket, buff, sizeof(buff));
+      fprintf(clientInfo->log, "[-->> IncomingThread] - message from server: %s\n", buff);
+      fflush(clientInfo->log);
       strncpy(msg.text, buff, sizeof(buff));
       msg.type = 1;
       int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
