@@ -24,27 +24,54 @@ int main()
     clientInfo.servaddr.sin_family = AF_INET;
     clientInfo.servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     clientInfo.servaddr.sin_port = htons(PORT);
-		clientInfo.msg_size = sizeof(clientInfo.srvMsgRec) - sizeof(long);
-		clientInfo.msg_id = -1;
+		clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
+		clientInfo.msgIdUIRec = -1;
+    clientInfo.msgIdUISnd = -1;
+    clientInfo.log = fopen("x2.log", "a+");
 
-		// Create a new message queue
-		key_t msg_key = ftok("./test2", 0);
+		// Create a new message queue - msg UI receive
+    system("touch mq.rec.key");
+		key_t msg_key = ftok("./mq.rec.key", 0);
 		if(msg_key == -1)
 		{
 			//printf ("Cannot get msg_key\n");
 			exit(1);
 		}
-		if((clientInfo.msg_id = msgget(msg_key, 0)) == -1)
+		if((clientInfo.msgIdUIRec = msgget(msg_key, 0)) == -1)
 		{
-			clientInfo.msg_id = msgget(msg_key, IPC_CREAT | 0660);
-			if(clientInfo.msg_id == -1)
+			clientInfo.msgIdUIRec = msgget(msg_key, IPC_CREAT | 0660);
+			if(clientInfo.msgIdUIRec == -1)
 			{
 				fflush(stdout);
-				//printf ("Cannot get clientInfo.msg_id ... \n");
+				//printf ("Cannot get clientInfo.msgIdUIRec ... \n");
 				exit(1);
 			}
 			sleep(1);
 		}
+
+    // Create a new message queue - msg UI send
+    system("touch mq.snd.key");
+		key_t msg_key_snd = ftok("./mq.snd.key", 0);
+		if(msg_key_snd == -1)
+		{
+			//printf ("Cannot get msg_key_snd\n");
+			exit(1);
+		}
+		if((clientInfo.msgIdUISnd = msgget(msg_key_snd, 0)) == -1)
+		{
+			clientInfo.msgIdUISnd = msgget(msg_key_snd, IPC_CREAT | 0660);
+			if(clientInfo.msgIdUISnd == -1)
+			{
+				fflush(stdout);
+				//printf ("Cannot get clientInfo.msgIdUISnd ... \n");
+				exit(1);
+			}
+			sleep(1);
+		}
+
+    fprintf(clientInfo.log, "[-- Main] msgIdUIRec=%d, msgIdUISnd=%d\n", clientInfo.msgIdUIRec, clientInfo.msgIdUISnd);
+    fflush(clientInfo.log);
+
 		//printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientIncomingThread
 		if (pthread_create(&(clientInfo.pInc), NULL, clientIncomingThread, &clientInfo))

@@ -37,11 +37,14 @@ typedef struct
   pthread_t  pInc;
   pthread_t  pOut;
   struct sockaddr_in servaddr;
-  struct myMsg srvMsgRec;
+  struct myMsg srvMsgUIRec;
+  struct myMsg srvMsgSnd;
   int msg_size ;
   WINDOW *client_msg_window;
   WINDOW *client_input_window;
-	int msg_id;
+	int msgIdUIRec;
+  int msgIdUISnd;
+  FILE *log;
 
 } ClientInfoDef;
 

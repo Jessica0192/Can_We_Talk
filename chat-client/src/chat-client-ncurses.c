@@ -16,7 +16,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
 
   //printf("[Receiver] %p \n", (uintptr_t)clientInfo);
   //printf("[Receiver] clientInfo->type = %d \n", clientInfo->type);
-  //printf("[Receiver] clientInfo->msg_id = %d \n", clientInfo->msg_id);
+  //printf("[Receiver] clientInfo->msgIdUIRec = %d \n", clientInfo->msgIdUIRec);
 
   int index = 0;
   struct myMsg xx;
@@ -24,15 +24,15 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
 
   while (true)
   {
-    int rtn = msgrcv(clientInfo->msg_id, &xx, msg_size, 1, 0);
+    int rtn = msgrcv(clientInfo->msgIdUIRec, &xx, msg_size, 1, 0);
     if( rtn  != -1 )
     {
       //to update the curser
       wmove(clientInfo->client_msg_window, index + 2, 1);
-      // mvprintw(index % 10, 1, "[%s]--Message Received: %d -(msg_id: %d) %d : %s \n",
-      wprintw(clientInfo->client_msg_window, "Message Received: %d -(msg_id: %d) %d : %s",
+      // mvprintw(index % 10, 1, "[%s]--Message Received: %d -(msgIdUIRec: %d) %d : %s \n",
+      wprintw(clientInfo->client_msg_window, "Message Received: %d -(msgIdUIRec: %d) %d : %s",
         clientInfo->type,
-        clientInfo->msg_id,
+        clientInfo->msgIdUIRec,
         index, xx.text
       );
 
@@ -43,7 +43,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
     {
       mvprintw(index % 10, 1, "Message Missed: (%s) %d - (%d) %d",
         clientInfo->servaddr.sin_addr.s_addr,
-        clientInfo->type, clientInfo->msg_id, index
+        clientInfo->type, clientInfo->msgIdUIRec, index
       );
       index = index + 1;
       refresh();
@@ -61,8 +61,11 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
   char word[81] = {0};
   int ch;
 
+  struct myMsg msg;
+  msg.type = 1;
+
   int maxrow, maxcol, row = 2, col = 2;
-     
+
   getmaxyx(clientInfo->client_input_window, maxrow, maxcol);          /* get window size */
 
   //to position curser at top
@@ -75,7 +78,7 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
     //index = index + 1;
     //wrefresh(clientInfo->client_input_window);
     // sleep(2);
-     for (int i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++) 
+     for (int i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
      {
        word[i] = ch;                       /* '\n' not copied */
        if (col++ < maxcol-2)               /* if within window */
@@ -103,7 +106,16 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
          }
        }
      }
-     
+
+     fprintf(clientInfo->log, "[-- monitorInputWindow] msg: %s\n", word);
+     strncpy(msg.text, word, sizeof(word));
+     int rtn_code = msgsnd(clientInfo->msgIdUISnd, (void *) &msg, sizeof(msg.text), 0);
+     if (rtn_code == -1)
+     {
+       fprintf(clientInfo->log, "[-- monitorInputWindow] Send msg failed - (msgIdUISnd:%d) - %d \n", clientInfo->msgIdUISnd,  rtn_code);
+     }
+     fflush(clientInfo->log);
+
      wmove(clientInfo->client_input_window, 2, 2);           /* move cursor to the beginning */
      wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to end of line(eol) */
   }
@@ -115,20 +127,19 @@ void * open_ui(ClientInfoDef * clientInfo)
 
   //printf("[open_ui] %p \n", (uintptr_t)clientInfo);
   initscr();			/* Start curses mode 		  */
-  
 
   int client_input_window_size = 5;
   int parent_x, parent_y, new_x, new_y;
 
   int chat_height = 5;
   int chat_width  = COLS - 2;
-  int chat_startx = 1;        
-  int chat_starty = LINES - chat_height;        
-     
+  int chat_startx = 1;
+  int chat_starty = LINES - chat_height;
+
   int msg_height = LINES - chat_height - 1;
   int msg_width  = COLS;
-  int msg_startx = 0;        
-  int msg_starty = 0;   
+  int msg_startx = 0;
+  int msg_starty = 0;
 
   //to get maximum size of y and x of the screen
   getmaxyx(stdscr, parent_y, parent_x);

@@ -39,6 +39,8 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   struct sockaddr_in server_addr;
   struct hostent*    host = gethostbyname("localhost");
 
+  fprintf(clientInfo->log, "[-->> IncomingThread] Started ...\n");
+  fflush(clientInfo->log);
 
   /*
    * initialize struct to get a socket to host
@@ -101,10 +103,10 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
       strncpy(msg.text, buff, sizeof(buff));
       msg.type = 1;
       // strcat(msg.text, str);
-      int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), 0);
+      int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
       if (rtn_code == -1)
       {
-        printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msg_id,  rtn_code);
+        printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msgIdUIRec,  rtn_code);
         // exit(1);
       }
 
@@ -114,7 +116,7 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 
 	//printf("[Sender] %p \n", (uintptr_t)clientInfo);
 	//printf("[Sender] clientInfo->type = %d \n", clientInfo->type);
-	//printf("[Sender] clientInfo->msg_id = %d \n", clientInfo->msg_id);
+	//printf("[Sender] clientInfo->msgIdUIRec = %d \n", clientInfo->msgIdUIRec);
 
 	// int client_socket = create_socket(clientInfo->servaddr);
 
@@ -126,11 +128,11 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 	// 		sprintf(str, " - %d", (rand() % (30 - 10 + 1)) + 10);
 	// 		strncpy(msg.text, "hello", 20);
 	// 		strcat(msg.text,str);
-	// 		// int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), IPC_NOWAIT);
-	// 		int rtn_code = msgsnd(clientInfo->msg_id, (void *) &msg, sizeof(msg.text), 0);
+	// 		// int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), IPC_NOWAIT);
+	// 		int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
 	// 		if (rtn_code == -1)
 	// 		{
-	// 			//printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msg_id,  rtn_code);
+	// 			//printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msgIdUIRec,  rtn_code);
 	// 			exit(1);
 	// 		}
 	// 		sleep(2);
@@ -149,6 +151,8 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
   struct sockaddr_in server_addr;
   struct hostent*    host = gethostbyname("localhost");
 
+  fprintf(clientInfo->log, "[--<< OutgoingThread] Started ...\n");
+  fflush(clientInfo->log);
 
   /*
    * initialize struct to get a socket to host
@@ -188,25 +192,13 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
   char buff[MAX];
   int n;
 
+  struct myMsg msgUISend;
+  int msgUISendSize = sizeof(msgUISend) - sizeof(long);
+
   for (;;) {
-    // bzero(buff, sizeof(buff));
-    // printf("[OutGoing-%d] Enter the string : ", client_socket);
-    // n = 0;
-    // while ((buff[n++] = getchar()) != '\n')
-    //   ;
-    // printf("[OutGoing] Input received\n");
-
-		char str[20];
-		sprintf(str, " - %d", (rand() % (30 - 10 + 1)) + 10);
-		strncpy(buff, "hello", 20);
-		strcat(buff,str);
-
-    write(client_socket, buff, sizeof(buff));
-    // printf("[OutGoing] Input sent, socket: %d\n", client_socket);
-    bzero(buff, sizeof(buff));
-    // printf("[OutGoing] Sent, read response now ...\n");
+    int rtn = msgrcv(clientInfo->msgIdUISnd, &msgUISend, msgUISendSize, 1, 0);
+    write(client_socket, msgUISend.text, sizeof(msgUISend.text));
     read(client_socket, buff, sizeof(buff));
-    // printf("[OutGoing] From Server : %s\n", buff);
     sleep(10);
   }
 
