@@ -1,5 +1,5 @@
 chat-client/*.log
-chat-client/bin/*
-chat-client/obj/*
-chat-server/bin/*
-chat-server/obj/*
+chat-client/bin/chat*
+chat-client/obj/*.o
+chat-server/bin/chat*
+chat-server/obj/*.o
