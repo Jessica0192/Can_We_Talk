@@ -18,9 +18,12 @@ int main(int argc,char* argv[])
 
 		ClientInfoDef clientInfo;
 		clientInfo.type = 312;
+
+    memset (&clientInfo.servaddr, 0, sizeof (clientInfo.servaddr));
     clientInfo.servaddr.sin_family = AF_INET;
-    clientInfo.servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // clientInfo.servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     clientInfo.servaddr.sin_port = htons(PORT);
+
 		clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
 		clientInfo.msgIdUIRec = -1;
     clientInfo.msgIdUISnd = -1;
@@ -51,6 +54,7 @@ int main(int argc,char* argv[])
         strncpy(clientInfo.server, argTmp, strlen(argTmp)+1);
         fprintf(clientInfo.log, "[Main] The server is : %s (length=%d/%d)\n", clientInfo.server, strlen(clientInfo.server), strlen(argTmp));
         serverIsGiven = true;
+        clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
       }
     }
     fflush(clientInfo.log);
@@ -59,12 +63,12 @@ int main(int argc,char* argv[])
     bool validatePassed = true;
     if (!userIsGiven)
     {
-      printf("Error! user is not given ... please append args --user=<your_user_name>\n");
+      printf("Error! user is not given ... please append args e.g. --user=UserA\n");
       validatePassed = false;
     }
     if (!serverIsGiven)
     {
-      printf("Error! server is not given ... please append args --server=<your_server_ip>\n");
+      printf("Error! server is not given ... please append args e.g. --server=127.0.0.1\n");
       validatePassed = false;
     }
     if(!validatePassed)
@@ -129,6 +133,13 @@ int main(int argc,char* argv[])
 			//printf ("[CLIENT] : clientOutGoingThread FAILED\n");
 			fflush(stdout);
 		}
+
+    while(!clientInfo.incomingConnEstablished || !clientInfo.outgoingConnEstablished)
+    {
+      fprintf(clientInfo.log, "[Main] Waiting to connect to the server ...\n");
+      fflush(clientInfo.log);
+      sleep(2);
+    }
 
 		// Open UI
 		open_ui(&clientInfo);

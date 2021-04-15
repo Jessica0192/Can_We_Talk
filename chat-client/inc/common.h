@@ -21,7 +21,7 @@
 #include <errno.h>
 
 #define MAX 80
-#define PORT 8080
+#define PORT 5000
 #define SA struct sockaddr
 
 struct myMsg
@@ -47,6 +47,8 @@ typedef struct
   FILE *log;
   char username[20];
   char server[20];
+  bool incomingConnEstablished;
+  bool outgoingConnEstablished;
 
 } ClientInfoDef;
 

@@ -10,66 +10,38 @@
 
 #include "../inc/chat-client-helpers.h"
 
-int create_socket(struct sockaddr_in servaddr)
-{
-	int client_socket;
-	// socket create and varification
-	if ((client_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-			//printf("socket creation failed...\n");
-			exit(0);
-	}
-	printf("Socket successfully created..\n");
-	bzero(&servaddr, sizeof(servaddr));
-
-	printf("Connected to the server..\n");
-
-	// cientIncomingThread
-	if (connect(client_socket, (SA*)&servaddr, sizeof(servaddr)) != 0) {
-			//printf("connection with the server failed...\n");
-			exit(0);
-	}
-	return client_socket;
-}
-
 void * clientIncomingThread(ClientInfoDef *clientInfo)
 {
 
-  int                client_socket, len, done;
-  int                whichClient = 123;
-  struct sockaddr_in server_addr;
-  struct hostent*    host = gethostbyname("localhost");
+  int client_socket;
+  // struct hostent*    host = gethostbyname("localhost");
 
   fprintf(clientInfo->log, "[-->> IncomingThread] Started ...\n");
   fflush(clientInfo->log);
 
   /*
-   * initialize struct to get a socket to host
-   */
-  memset (&server_addr, 0, sizeof (server_addr));
-  server_addr.sin_family = AF_INET;
-  memcpy (&server_addr.sin_addr, host->h_addr, host->h_length);
-  server_addr.sin_port = htons (5000);
-
-  /*
   * get a socket for communications
   */
-  fflush(stdout);
+  // fflush(stdout);
   if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
   {
-    printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
+    printf ("[CLIENT] : Getting Client Socket - FAILED\n");
     return NULL;
   }
+
 
   /*
   * attempt a connection to server
   */
   fflush(stdout);
-  if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
+  if (connect (client_socket, (struct sockaddr *)&clientInfo->servaddr,sizeof(clientInfo->servaddr)) < 0)
   {
-    printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
+    fprintf(clientInfo->log, "[-->> IncomingThread] - [CLIENT] : Connect to Server - FAILED\n");
+    fflush(clientInfo->log);
     close (client_socket);
-    return NULL;
+    exit(1);
   }
+  clientInfo->incomingConnEstablished = true;
 
    char buff[MAX];
    char * tmpmsg = {"000/dummy"};
@@ -79,14 +51,10 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
    for (;;) {
       sleep(1);
       write(client_socket, tmpmsg, sizeof(tmpmsg));
-      // printf("[Incoming] Input sent, socket: %d\n", client_socket);
       bzero(buff, sizeof(buff));
-      // printf("[Incoming] Sent, read response now ...\n");
       read(client_socket, buff, sizeof(buff));
-
       strncpy(msg.text, buff, sizeof(buff));
       msg.type = 1;
-      // strcat(msg.text, str);
       int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
       if (rtn_code == -1)
       {
@@ -101,23 +69,9 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 void * clientOutGoingThread(ClientInfoDef *clientInfo)
 {
 
-  sleep(2);
-
-  int                client_socket, len, done;
-  int                whichClient = 123;
-  struct sockaddr_in server_addr;
-  struct hostent*    host = gethostbyname("localhost");
-
+  int client_socket;
   fprintf(clientInfo->log, "[--<< OutgoingThread] Started ...\n");
   fflush(clientInfo->log);
-
-  /*
-   * initialize struct to get a socket to host
-   */
-  memset (&server_addr, 0, sizeof (server_addr));
-  server_addr.sin_family = AF_INET;
-  memcpy (&server_addr.sin_addr, host->h_addr, host->h_length);
-  server_addr.sin_port = htons (5000);
 
   /*
   * get a socket for communications
@@ -125,17 +79,19 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
   fflush(stdout);
   if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
   {
-     printf ("[CLIENT-%d] : Getting Client Socket - FAILED\n", whichClient);
-     return NULL;
+    fprintf(clientInfo->log, "[-->> OutgoingThread] - [CLIENT] : Connect to Server - FAILED\n");
+    fflush(clientInfo->log);
+    exit(1);
   }
+  clientInfo->outgoingConnEstablished = true;
 
   /*
   * attempt a connection to server
   */
   fflush(stdout);
-  if (connect (client_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0)
+  if (connect (client_socket, (struct sockaddr *)&clientInfo->servaddr, sizeof(clientInfo->servaddr)) < 0)
   {
-     printf ("[CLIENT-%d] : Connect to Server - FAILED\n", whichClient);
+     printf ("[CLIENT] : Connect to Server - FAILED\n");
      close (client_socket);
      return NULL;
   }
@@ -149,7 +105,7 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
     int rtn = msgrcv(clientInfo->msgIdUISnd, &msgUISend, msgUISendSize, 1, 0);
     write(client_socket, msgUISend.text, sizeof(msgUISend.text));
     read(client_socket, buff, sizeof(buff));
-    sleep(10);
+    // sleep(10);
   }
 
 	// close the socket
