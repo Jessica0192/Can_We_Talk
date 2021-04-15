@@ -71,14 +71,11 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
     return NULL;
   }
 
-
    char buff[MAX];
    char * tmpmsg = {"000/dummy"};
    int n;
 
    struct myMsg msg;
-
-
    for (;;) {
       sleep(1);
       write(client_socket, tmpmsg, sizeof(tmpmsg));

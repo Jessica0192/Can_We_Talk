@@ -45,12 +45,32 @@ int main(int argc,char* argv[])
       }
       else if(strncmp(argv[counter], "--server=", strlen("--server")) == 0)
       {
+        argTmp = strtok(argv[counter], "=");
+        argTmp = strtok(NULL, "=");
         fprintf(clientInfo.log, "[Main] Server is given as argv[%d]: %s \n",counter,argv[counter]);
+        strncpy(clientInfo.server, argTmp, strlen(argTmp)+1);
+        fprintf(clientInfo.log, "[Main] The server is : %s (length=%d/%d)\n", clientInfo.server, strlen(clientInfo.server), strlen(argTmp));
         serverIsGiven = true;
       }
-
     }
     fflush(clientInfo.log);
+
+    // Validate command-line args
+    bool validatePassed = true;
+    if (!userIsGiven)
+    {
+      printf("Error! user is not given ... please append args --user=<your_user_name>\n");
+      validatePassed = false;
+    }
+    if (!serverIsGiven)
+    {
+      printf("Error! server is not given ... please append args --server=<your_server_ip>\n");
+      validatePassed = false;
+    }
+    if(!validatePassed)
+    {
+      exit(1);
+    }
 
 		// Create a new message queue - msg UI receive
     system("touch mq.rec.key");
