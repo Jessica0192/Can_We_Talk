@@ -45,6 +45,8 @@ typedef struct
 	int msgIdUIRec;
   int msgIdUISnd;
   FILE *log;
+  char username[20];
+  char server[20];
 
 } ClientInfoDef;
 

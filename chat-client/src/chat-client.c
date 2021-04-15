@@ -13,12 +13,9 @@ void * clientIncomingThread(ClientInfoDef *clientInfo);
 void * clientOutGoingThread(ClientInfoDef *clientInfo);
 void * open_ui(ClientInfoDef *clientInfo);
 
-// #include "../inc/chat-client-helpers.h"
-// #include "../inc/chat-client-ncurses.h"
-
-int main()
+int main(int argc,char* argv[])
 {
-		// pthread_t  pInc, pOut;
+
 		ClientInfoDef clientInfo;
 		clientInfo.type = 312;
     clientInfo.servaddr.sin_family = AF_INET;
@@ -28,6 +25,32 @@ int main()
 		clientInfo.msgIdUIRec = -1;
     clientInfo.msgIdUISnd = -1;
     clientInfo.log = fopen("x2.log", "a+");
+
+    // Parse input args
+    int counter;
+    bool userIsGiven = false;
+    bool serverIsGiven = false;
+    char *argTmp;
+    for(counter=0;counter<argc;counter++)
+    {
+      // fprintf(clientInfo.log, "[Main] argv[%d]: %s \n",counter,argv[counter]);
+      if(strncmp(argv[counter], "--user=", strlen("--user")) == 0)
+      {
+        argTmp = strtok(argv[counter], "=");
+        argTmp = strtok(NULL, "=");
+        fprintf(clientInfo.log, "[Main] User is given as argv[%d]: %s \n",counter,argv[counter]);
+        strncpy(clientInfo.username, argTmp, strlen(argTmp)+1);
+        fprintf(clientInfo.log, "[Main] The given user name is : %s (length=%d/%d)\n", clientInfo.username, strlen(clientInfo.username), strlen(argTmp));
+        userIsGiven = true;
+      }
+      else if(strncmp(argv[counter], "--server=", strlen("--server")) == 0)
+      {
+        fprintf(clientInfo.log, "[Main] Server is given as argv[%d]: %s \n",counter,argv[counter]);
+        serverIsGiven = true;
+      }
+
+    }
+    fflush(clientInfo.log);
 
 		// Create a new message queue - msg UI receive
     system("touch mq.rec.key");
@@ -69,7 +92,7 @@ int main()
 			sleep(1);
 		}
 
-    fprintf(clientInfo.log, "[-- Main] msgIdUIRec=%d, msgIdUISnd=%d\n", clientInfo.msgIdUIRec, clientInfo.msgIdUISnd);
+    fprintf(clientInfo.log, "[Main] msgIdUIRec=%d, msgIdUISnd=%d\n", clientInfo.msgIdUIRec, clientInfo.msgIdUISnd);
     fflush(clientInfo.log);
 
 		//printf("[CLIENT-1] %p \n", (uintptr_t)&clientInfo);
@@ -80,7 +103,6 @@ int main()
 			fflush(stdout);
 		}
 
-//    printf("[CLIENT-2] %p \n", (uintptr_t)&clientInfo);
 		// Create and launch clientOutGoingThread
 		if (pthread_create(&(clientInfo.pOut), NULL, clientOutGoingThread, &clientInfo))
 		{
@@ -88,14 +110,11 @@ int main()
 			fflush(stdout);
 		}
 
-		//printf("[CLIENT-3] %p \n", (uintptr_t)&clientInfo);
 		// Open UI
 		open_ui(&clientInfo);
 
-		//printf("[CLIENT-4] %p \n", (uintptr_t)&clientInfo);
 
-		// Waiting for a thread
-		//printf("Waiting for threads to exit... \n");
+		// Waiting for threads
 		int* ptr;
 		pthread_join(clientInfo.pInc, &ptr);
 		pthread_join(clientInfo.pOut, &ptr);

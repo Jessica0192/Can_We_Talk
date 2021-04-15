@@ -29,13 +29,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
     {
       //to update the curser
       wmove(clientInfo->client_msg_window, index + 2, 1);
-      // mvprintw(index % 10, 1, "[%s]--Message Received: %d -(msgIdUIRec: %d) %d : %s \n",
-      wprintw(clientInfo->client_msg_window, "Message Received: %d -(msgIdUIRec: %d) %d : %s",
-        clientInfo->type,
-        clientInfo->msgIdUIRec,
-        index, xx.text
-      );
-
+      wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
       index = index + 1;
       wrefresh(clientInfo->client_msg_window);
     }
@@ -71,6 +65,7 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
   //to position curser at top
   wmove(clientInfo->client_input_window, 2, 2);
 
+  int i;
   while (true)
   {
     //wgetnstr(clientInfo->client_input_window, input, 80);
@@ -78,12 +73,12 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
     //index = index + 1;
     //wrefresh(clientInfo->client_input_window);
     // sleep(2);
-     for (int i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
+     for (i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
      {
        word[i] = ch;                       /* '\n' not copied */
        if (col++ < maxcol-2)               /* if within window */
        {
-         wprintw(clientInfo->client_input_window, "%c", word[i]);      /* display the char recv'd */
+         // wprintw(clientInfo->client_input_window, "%c", word[i]);      /* display the char recv'd */
        }
        else                                /* last char pos reached */
        {
@@ -106,9 +101,12 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
          }
        }
      }
+     word[i] = 0;
 
      fprintf(clientInfo->log, "[-- monitorInputWindow] msg: %s\n", word);
-     strncpy(msg.text, word, sizeof(word));
+     strncpy(msg.text, clientInfo->username, sizeof(clientInfo->username));
+     strcat(msg.text, "/");
+     strcat(msg.text, word);
      int rtn_code = msgsnd(clientInfo->msgIdUISnd, (void *) &msg, sizeof(msg.text), 0);
      if (rtn_code == -1)
      {
