@@ -41,7 +41,7 @@ static int counter;
 volatile pthread_t	     tid[10];
 
 int main(void)
-{printf("\nHELLO1\n");
+{
 	serv_th = (serverThread*)malloc(sizeof(serverThread));
 	 
 	int                server_socket, client_socket;
@@ -49,7 +49,7 @@ int main(void)
 	struct sockaddr_in client_addr, server_addr;
 	int                len, i;
 	//pthread_t	     tid[3];
-	int                whichClient;=
+	int                whichClient;
 	signal (SIGINT, sigIntHandler);
 	numClients = 0;
 	counter=0;
@@ -62,7 +62,7 @@ int main(void)
 	  return 1;
 	}
 	printf("[SERVER] : socket() successful\n");
-	global_serv_socket = server_socket;=
+	global_serv_socket = server_socket;
 	  /*
 	   * initialize our server address info for binding purposes
 	   */ 
@@ -177,7 +177,7 @@ int main(void)
 // Socket handler - this function is called (spawned as a thread of execution)
 //
 
-void *socketThread(void *clientSocket)
+void *socketThread(void *clientSocket){
   // used for accepting incoming command and also holding the command's response
   char buffer[BUFSIZ];
   char message[BUFSIZ];
