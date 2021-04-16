@@ -9,6 +9,23 @@
 */
 
 #include "../inc/chat-client-ncurses.h"
+void pushMessage(ClientInfoDef* clientInfo, char* msg);
+
+void pushMessage(ClientInfoDef* clientInfo, char* msgtxt)
+{
+  fprintf(clientInfo->log, "[-- monitorInputWindow] msg: %s\n", msgtxt);
+  struct myMsg msg;
+  msg.type = 1;
+  strncpy(msg.text, clientInfo->username, sizeof(clientInfo->username));
+  strcat(msg.text, "/");
+  strcat(msg.text, msgtxt);
+  int rtn_code = msgsnd(clientInfo->msgIdUISnd, (void *) &msg, sizeof(msg.text), 0);
+  if (rtn_code == -1)
+  {
+    fprintf(clientInfo->log, "[-- monitorInputWindow] Send msg failed - (msgIdUISnd:%d) - %d \n", clientInfo->msgIdUISnd,  rtn_code);
+  }
+  fflush(clientInfo->log);
+}
 
 // void * monitorMsgWindow(void *client_msg_window)
 void * monitorMsgWindow(ClientInfoDef* clientInfo)
@@ -65,6 +82,8 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
   //to position curser at top
   wmove(clientInfo->client_input_window, 2, 2);
 
+
+  pushMessage(clientInfo, "Hello I am here.");
   int i;
   while (true)
   {
@@ -102,18 +121,7 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
        }
      }
      word[i] = 0;
-
-     fprintf(clientInfo->log, "[-- monitorInputWindow] msg: %s\n", word);
-     strncpy(msg.text, clientInfo->username, sizeof(clientInfo->username));
-     strcat(msg.text, "/");
-     strcat(msg.text, word);
-     int rtn_code = msgsnd(clientInfo->msgIdUISnd, (void *) &msg, sizeof(msg.text), 0);
-     if (rtn_code == -1)
-     {
-       fprintf(clientInfo->log, "[-- monitorInputWindow] Send msg failed - (msgIdUISnd:%d) - %d \n", clientInfo->msgIdUISnd,  rtn_code);
-     }
-     fflush(clientInfo->log);
-
+     pushMessage(clientInfo, word);
      wmove(clientInfo->client_input_window, 2, 2);           /* move cursor to the beginning */
      wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to end of line(eol) */
   }
