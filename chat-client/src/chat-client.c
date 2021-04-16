@@ -56,6 +56,23 @@ int main(int argc,char* argv[])
         serverIsGiven = true;
         clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
       }
+      else if(strncmp(argv[counter], "-user", strlen("-user")) == 0)
+      {
+        argTmp = argv[counter]+5;
+        fprintf(clientInfo.log, "[Main] User is given as argv[%d]: %s \n",counter,argv[counter]);
+        strncpy(clientInfo.username, argTmp, strlen(argTmp)+1);
+        fprintf(clientInfo.log, "[Main] The given user name is : %s (length=%d/%d)\n", clientInfo.username, strlen(clientInfo.username), strlen(argTmp));
+        userIsGiven = true;
+      }
+      else if(strncmp(argv[counter], "-server", strlen("-server")) == 0)
+      {
+        argTmp = argv[counter]+7;
+        fprintf(clientInfo.log, "[Main] Server is given as argv[%d]: %s \n",counter,argv[counter]);
+        strncpy(clientInfo.server, argTmp, strlen(argTmp)+1);
+        fprintf(clientInfo.log, "[Main] The server is : %s (length=%d/%d)\n", clientInfo.server, strlen(clientInfo.server), strlen(argTmp));
+        serverIsGiven = true;
+        clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
+      }
     }
     fflush(clientInfo.log);
 
@@ -63,12 +80,12 @@ int main(int argc,char* argv[])
     bool validatePassed = true;
     if (!userIsGiven)
     {
-      printf("Error! user is not given ... please append args e.g. --user=UserA\n");
+      printf("Error! user is not given ... please append args -user[USER_NAME] e.g. -userUserA\n");
       validatePassed = false;
     }
     if (!serverIsGiven)
     {
-      printf("Error! server is not given ... please append args e.g. --server=127.0.0.1\n");
+      printf("Error! server is not given ... please append args -servre[SERVER_IP] e.g. -server127.0.0.1\n");
       validatePassed = false;
     }
     if(!validatePassed)
