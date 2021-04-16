@@ -38,13 +38,22 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
   int index = 0;
   struct myMsg xx;
   int msg_size = sizeof(xx) - sizeof(long);
+  int j = 1;
 
   while (true)
   {
+
+    if (j > 10)
+    {
+	scroll(clientInfo->client_msg_window); 
+	j = 1;
+    }
+
+      //to update the curser
+
     int rtn = msgrcv(clientInfo->msgIdUIRec, &xx, msg_size, 1, 0);
     if( rtn  != -1 )
     {
-      //to update the curser
       wmove(clientInfo->client_msg_window, index + 2, 1);
       wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
       index = index + 1;
@@ -59,6 +68,9 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
       index = index + 1;
       refresh();
     }
+
+    j = j + 1;
+
     // refresh();
     // sleep(1);
     // wclear(clientInfo->client_msg_window);
@@ -95,6 +107,16 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
      for (i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
      {
        word[i] = ch;                       /* '\n' not copied */
+
+       if (word[0] == '>' && word[1] == '>' && word[2] == 'b' && word[3] == 'y' && word[4] == 'e' && word[5] == '<' && word[6] == '<')
+       {
+	  pushMessage(clientInfo, ">>bye<<");
+	  //destroy_win(clientInfo->client_msg_window);
+  	  //destroy_win(clientInfo->client_input_window);
+	  endwin();
+       }
+
+
        if (col++ < maxcol-2)               /* if within window */
        {
          // wprintw(clientInfo->client_input_window, "%c", word[i]);      /* display the char recv'd */
