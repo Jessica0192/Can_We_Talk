@@ -104,6 +104,7 @@ int main(void)
     if (numClients == 0 || numClients > max_num_clients)
     {
       break;
+      sleep(1);
     }
 
     printf("[SERVER] : Ready to accept()\n");
@@ -111,7 +112,7 @@ int main(void)
 
     counter++;
 
-         /*
+    /*
     * accept a packet from the client
     */
     client_len = sizeof (client_addr);
@@ -193,48 +194,54 @@ void *socketThread(void *clientSocket){
 
   read (clSocket, buffer, BUFSIZ);
   parsed_userID = strtok(buffer, "/");
-  printf("parsedUSERID: %s, msg: %s\n", parsed_userID, buffer);
+  parsed_msg = strtok(NULL, "/");
+  printf(">>>  parsedUSERID: %s, msg: %s\n", parsed_userID, parsed_msg);
   serv_th->userID[numClients - 1] = parsed_userID;
 
   //parsed_msg = strtok(NULL, "/");
-  parsed_msg = parsed_userID;
+  // parsed_msg = parsed_userID;
   printf("hello function for socket thread\n");
   if (parsed_userID != 0)
   {
     while(strcmp(parsed_msg,">>bye<<") != 0)
     {
-      time_t t = time(NULL);
-      struct tm tm = *localtime(&t);
-      /* we're actually not going to execute the command - but we could if we wanted */
 
-      char* null_str = NULL;
-
-      if (parsed_msg)
+      if(strcmp(parsed_userID,"000") != 0)
       {
+        time_t t = time(NULL);
+        struct tm tm = *localtime(&t);
+        /* we're actually not going to execute the command - but we could if we wanted */
 
-        printf("numCleints: %d\n", numClients);
-        sprintf (message, "[%d] [%s] << %s (%02d:%02d:%02d)", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+        char* null_str = NULL;
 
-        for (int i = 0; i < numClients; i++)
+        if (parsed_msg)
         {
-          if (serv_th->IPaddress[i] != clSocket)
-          {
-            printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-            printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
 
-            if(serv_th->IPaddress[i] != 0 && write (serv_th->IPaddress[i], message, strlen(message)) == -1)
-            {
-              printf("Socket write failed\n");
-            }
+          printf("numCleints: %d\n", numClients);
+          sprintf (message, "[%d] [%s] << %s (%02d:%02d:%02d)", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+          for (int i = 0; i < numClients; i++)
+          {
+            // if (serv_th->IPaddress[i] != clSocket)
+            // {
+              printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+              printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+
+              if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
+              {
+                printf("Socket write failed\n");
+              }
+            // }
           }
         }
       }
-
       // clear out and get the next command and process
       memset(buffer,0,BUFSIZ);
       memset(message,0,sizeof(message));
-
       read (clSocket, buffer, BUFSIZ);
+      parsed_userID = strtok(buffer, "/");
+      parsed_msg = strtok(NULL, "/");
+      printf("\n>>>++  parsedUSERID: %s, msg: %s\n", parsed_userID, parsed_msg);
     }
 
   }
@@ -296,7 +303,6 @@ void sigIntHandler(int signal)
 {
   // disable CTRL-C support! but only 3 times max!
   printf ("SIGINT IN CHAT-SERVER\n");
-
   close (global_serv_socket);
   exit(1);
 }

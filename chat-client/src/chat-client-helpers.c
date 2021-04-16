@@ -46,7 +46,7 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 
   struct myMsg msg;
   for (;;) {
-    sleep(1);
+    // sleep(1);
     write(client_socket, tmpmsg, sizeof(tmpmsg));
     bzero(buff, sizeof(buff));
     read(client_socket, buff, sizeof(buff));

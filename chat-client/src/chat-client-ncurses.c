@@ -60,7 +60,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
       refresh();
     }
     // refresh();
-    sleep(1);
+    // sleep(1);
     // wclear(clientInfo->client_msg_window);
   }
 }
