@@ -14,7 +14,6 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
 {
 
   int client_socket;
-  // struct hostent*    host = gethostbyname("localhost");
 
   fprintf(clientInfo->log, "[-->> IncomingThread] Started ...\n");
   fflush(clientInfo->log);
@@ -22,13 +21,11 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   /*
   * get a socket for communications
   */
-  // fflush(stdout);
   if ((client_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0)
   {
     printf ("[CLIENT] : Getting Client Socket - FAILED\n");
     return NULL;
   }
-
 
   /*
   * attempt a connection to server
@@ -43,29 +40,29 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   }
   clientInfo->incomingConnEstablished = true;
 
-   char buff[MAX];
-   char * tmpmsg = {"000/dummy"};
-   int n;
+  char buff[MAX];
+  char * tmpmsg = {"000/dummy"};
+  int n;
 
-   struct myMsg msg;
-   for (;;) {
-      sleep(1);
-      write(client_socket, tmpmsg, sizeof(tmpmsg));
-      bzero(buff, sizeof(buff));
-      read(client_socket, buff, sizeof(buff));
-      fprintf(clientInfo->log, "[-->> IncomingThread] - message from server: %s\n", buff);
-      fflush(clientInfo->log);
-      strncpy(msg.text, buff, sizeof(buff));
-      msg.type = 1;
-      int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
-      if (rtn_code == -1)
-      {
-        printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msgIdUIRec,  rtn_code);
-        // exit(1);
-      }
-   }
+  struct myMsg msg;
+  for (;;) {
+    sleep(1);
+    write(client_socket, tmpmsg, sizeof(tmpmsg));
+    bzero(buff, sizeof(buff));
+    read(client_socket, buff, sizeof(buff));
+    fprintf(clientInfo->log, "[-->> IncomingThread] - message from server: %s\n", buff);
+    fflush(clientInfo->log);
+    strncpy(msg.text, buff, sizeof(buff));
+    msg.type = 1;
+    int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
+    if (rtn_code == -1)
+    {
+      printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msgIdUIRec,  rtn_code);
+      // exit(1);
+    }
+  }
 
-	close(client_socket);
+  close(client_socket);
 }
 
 void * clientOutGoingThread(ClientInfoDef *clientInfo)
@@ -106,6 +103,8 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
   for (;;) {
     int rtn = msgrcv(clientInfo->msgIdUISnd, &msgUISend, msgUISendSize, 1, 0);
     write(client_socket, msgUISend.text, sizeof(msgUISend.text));
+    fprintf(clientInfo->log, "[-->> OutgoingThread] - message send to server: %s\n", msgUISend.text);
+    fflush(clientInfo->log);
     read(client_socket, buff, sizeof(buff));
     // sleep(10);
   }

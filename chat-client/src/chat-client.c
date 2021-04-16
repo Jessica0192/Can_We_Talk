@@ -133,6 +133,7 @@ int main(int argc,char* argv[])
 			fflush(stdout);
 		}
 
+
     while(!clientInfo.incomingConnEstablished || !clientInfo.outgoingConnEstablished)
     {
       fprintf(clientInfo.log, "[Main] Waiting to connect to the server ...\n");

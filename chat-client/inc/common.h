@@ -27,7 +27,7 @@
 struct myMsg
 {
 	long type;
-	char text[20];
+	char text[200];
 };
 
 typedef struct
