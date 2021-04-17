@@ -32,6 +32,7 @@
 void *socketThread(void *clientSocket);
 void sigIntHandler(int signal);
 char *truncString(char *str, int pos);
+
 typedef struct
 {
   // the following is a requriement of UNIX/Linux
@@ -140,6 +141,9 @@ int main(void)
     // now get it back and print it
     inet_ntop(AF_INET, &(client_addr.sin_addr), str, INET_ADDRSTRLEN);
 
+    char *client_ip = inet_ntoa(client_addr.sin_addr);
+    printf("-----------client_ip---------[%s]\n", client_ip);
+
     if(numClients == 1 && counter == 1)
     {
       numClients--;
@@ -184,6 +188,8 @@ int main(void)
 
   return 0;
 }
+
+
 
 //
 // Socket handler - this function is called (spawned as a thread of execution)
@@ -247,9 +253,9 @@ void *socketThread(void *clientSocket){
               printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
               if (serv_th->IPaddress[i] != clSocket)
               {
-                sprintf (message, "[%s]\t << %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                sprintf (message, "[%s]\t << %s \t\t(%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-                printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("[%d] [%s] << %s \t\t(%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
               }else{
                 sprintf (message, "[%s]\t >> %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
