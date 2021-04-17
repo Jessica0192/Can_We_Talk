@@ -219,6 +219,7 @@ void *socketThread(void *clientSocket){
     while(strcmp(parsed_msg,">>bye<<") != 0)
     {
 
+      printf("Start while loop\n");
       if(strcmp(parsed_userID,"000") != 0)
       {
         time_t t = time(NULL);
@@ -229,75 +230,56 @@ void *socketThread(void *clientSocket){
 
         if (parsed_msg)
         {
-
           printf("numCleints: %d\n", numClients);
-          
-
-	if (strlen(parsed_msg) >40)
-	{
-		truncString(parsed_msg, 40);
-	}
+          if (strlen(parsed_msg) >40)
+          {
+            truncString(parsed_msg, 40);
+          }
 
           for (int i = 0; i < numClients; i++)
           {
-		serv_th->userID[i] = (char *) malloc(100);
-	
+            serv_th->userID[i] = (char *) malloc(100);
 
-		if (strcmp(serv_th->userID[i], parsed_userID)!=0)
+
+            if (strcmp(serv_th->userID[i], parsed_userID)!=0)
             // if (serv_th->IPaddress[i] != clSocket)
-             { 
-
-
-
-	
-		printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
-
-		if (serv_th->IPaddress[i] != clSocket)
-		{
-				sprintf (message, "[%s]\t << %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-              printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-		}else{
-				sprintf (message, "[%s]\t >> %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-              printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	//i++;
-		}
-              
-
+            {
+              printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
+              if (serv_th->IPaddress[i] != clSocket)
+              {
+                sprintf (message, "[%s]\t << %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+                printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+              }else{
+                sprintf (message, "[%s]\t >> %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+                printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                //i++;
+              }
               if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
               {
                 printf("Socket write failed\n");
               }
-             }
-	     else{
-
-		
-			printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
-
-		if (serv_th->IPaddress[i] != clSocket)
-		{
-				sprintf (message, " [%s] << %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-              printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-		}else{
-				sprintf (message, " [%s] >> %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-              printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
-	//i++;
-		}
-              
-
+           }
+           else
+           {
+              printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
+              if (serv_th->IPaddress[i] != clSocket)
+              {
+                sprintf (message, " [%s] << %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+                printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+              }else{
+                sprintf (message, " [%s] >> %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+                printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                //i++;
+              }
               if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
               {
                 printf("Socket write failed\n");
               }
-
-			
-		}
-
-
-		
+            }
           }
         }
       }
@@ -311,6 +293,8 @@ void *socketThread(void *clientSocket){
     }
 
   }
+
+  printf("Exist while loop ...\n");
 
   for (int i = 0; i < numClients - 1; i++)
   {

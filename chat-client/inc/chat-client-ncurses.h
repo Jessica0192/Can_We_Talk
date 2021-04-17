@@ -12,3 +12,4 @@
 void * open_ui(ClientInfoDef *clientInfo);
 void * monitorMsgWindow(ClientInfoDef* clientInfo);
 void * monitorInputWindow(ClientInfoDef* clientInfo);
+void pushMessage(ClientInfoDef* clientInfo, char* msg);

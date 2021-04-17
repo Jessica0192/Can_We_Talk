@@ -66,13 +66,16 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
     strncpy(msg.text, buff, sizeof(buff));
     msg.type = 1;
     //to send the message to the server
-    int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), 0);
+    fprintf(clientInfo->log, "%u:[IncomingThread] Send message out ...\n", (unsigned)time(NULL));
+    fflush(clientInfo->log);
+    int rtn_code = msgsnd(clientInfo->msgIdUIRec, (void *) &msg, sizeof(msg.text), IPC_NOWAIT);
     //to handle if not able to send the message
     if (rtn_code == -1)
     {
       //to inform the user
-      printf ("xxSend msg failed - (%d) - %d \n", clientInfo->msgIdUIRec,  rtn_code);
-      // exit(1);
+      fprintf(clientInfo->log, "%u:[IncomingThread] Failed to send message out ...\n", (unsigned)time(NULL));
+      fflush(clientInfo->log);
+      exit(1);
     }
   }
 
