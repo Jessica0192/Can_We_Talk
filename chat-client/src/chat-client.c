@@ -1,31 +1,36 @@
 /*
 *
 *	FILE: chat-client.c
-*	PROJECT: A3
-*	PROGRAMMER: Suka Sun
-*	FIRST VERSION: 2021-03-20
+*	PROJECT: Can_We_Talk system - A4
+*	PROGRAMMER: Suka Sun, Hoda AkramiS
+*	FIRST VERSION: 2021-04-07
 *	DESCRIPTION: TBD
 *
 */
 
 #include "../inc/chat-client.h"
+
+//prototypes
 void * clientIncomingThread(ClientInfoDef *clientInfo);
 void * clientOutGoingThread(ClientInfoDef *clientInfo);
 void * open_ui(ClientInfoDef *clientInfo);
 
+
 int main(int argc,char* argv[])
 {
 
-		ClientInfoDef clientInfo;
-		clientInfo.type = 312;
+    ClientInfoDef clientInfo;
+    clientInfo.type = 312;
 
+    //?????????????????????????????????????????????
     memset (&clientInfo.servaddr, 0, sizeof (clientInfo.servaddr));
+    //?????????????????????????????????????????????????
     clientInfo.servaddr.sin_family = AF_INET;
-    // clientInfo.servaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
     clientInfo.servaddr.sin_port = htons(PORT);
 
-		clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
-		clientInfo.msgIdUIRec = -1;
+    //to get the message size
+    clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
+    clientInfo.msgIdUIRec = -1;
     clientInfo.msgIdUISnd = -1;
     clientInfo.log = fopen("x2.log", "a+");
 
@@ -34,9 +39,12 @@ int main(int argc,char* argv[])
     bool userIsGiven = false;
     bool serverIsGiven = false;
     char *argTmp;
+
+    //to pars the arguments
     for(counter=0;counter<argc;counter++)
     {
       // fprintf(clientInfo.log, "[Main] argv[%d]: %s \n",counter,argv[counter]);
+      //to handle and pars the user name if use --
       if(strncmp(argv[counter], "--user=", strlen("--user")) == 0)
       {
         argTmp = strtok(argv[counter], "=");
@@ -46,6 +54,7 @@ int main(int argc,char* argv[])
         fprintf(clientInfo.log, "[Main] The given user name is : %s (length=%d/%d)\n", clientInfo.username, strlen(clientInfo.username), strlen(argTmp));
         userIsGiven = true;
       }
+      //to handle and pars the server ip address if uses --
       else if(strncmp(argv[counter], "--server=", strlen("--server")) == 0)
       {
         argTmp = strtok(argv[counter], "=");
@@ -56,6 +65,7 @@ int main(int argc,char* argv[])
         serverIsGiven = true;
         clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
       }
+      //to handle and pars the server ip address if uses -
       else if(strncmp(argv[counter], "-user", strlen("-user")) == 0)
       {
         argTmp = argv[counter]+5;
@@ -64,12 +74,14 @@ int main(int argc,char* argv[])
         fprintf(clientInfo.log, "[Main] The given user name is : %s (length=%d/%d)\n", clientInfo.username, strlen(clientInfo.username), strlen(argTmp));
         userIsGiven = true;
       }
+      //to handle and pars the user name if uses -
       else if(strncmp(argv[counter], "-server", strlen("-server")) == 0)
       {
         argTmp = argv[counter]+7;
         fprintf(clientInfo.log, "[Main] Server is given as argv[%d]: %s \n",counter,argv[counter]);
         strncpy(clientInfo.server, argTmp, strlen(argTmp)+1);
         fprintf(clientInfo.log, "[Main] The server is : %s (length=%d/%d)\n", clientInfo.server, strlen(clientInfo.server), strlen(argTmp));
+        //ot set the flag 
         serverIsGiven = true;
         clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
       }
