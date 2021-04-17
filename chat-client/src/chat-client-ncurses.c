@@ -88,7 +88,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         //to update the curser
         wmove(clientInfo->client_msg_window, index + 2, 1);
         //to print in the window
-        wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
+        wprintw(clientInfo->client_msg_window, "%s", xx.text);
         //to increament the index and print the message on the next line
         index = index + 1;
         //to refresh the window
