@@ -71,7 +71,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
         newIndex = newIndex + 1;
         wrefresh(clientInfo->client_msg_window);
-        
+
 	if (j > 19)
         {
 	   j = 1;
@@ -129,51 +129,62 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
     //index = index + 1;
     //wrefresh(clientInfo->client_input_window);
     // sleep(2);
-     for (i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
-     {
-       word[i] = ch;                       /* '\n' not copied */
+    for (i = 0; (ch = wgetch(clientInfo->client_input_window)) != '\n'; i++)
+    {
+      word[i] = ch;                       /* '\n' not copied */
 
-       if (word[0] == '>' && word[1] == '>' && word[2] == 'b' && word[3] == 'y' && word[4] == 'e' && word[5] == '<' && word[6] == '<')
-       {
-	  pushMessage(clientInfo, ">>bye<<");
-	  //destroy_win(clientInfo->client_msg_window);
-  	  //destroy_win(clientInfo->client_input_window);
-	  endwin();
-       }
+      if (word[0] == '>' && word[1] == '>' && word[2] == 'b' && word[3] == 'y' && word[4] == 'e' && word[5] == '<' && word[6] == '<')
+      {
+        pushMessage(clientInfo, ">>bye<<");
+        //destroy_win(clientInfo->client_msg_window);
+        //destroy_win(clientInfo->client_input_window);
+        endwin();
+      }
 
+      if (col++ < maxcol-2)               /* if within window */
+      {
+        // wprintw(clientInfo->client_input_window, "%c", word[i]);      /* display the char recv'd */
+      }
+      else                                /* last char pos reached */
+      {
+        col = 4;
+        if (row == maxrow-2)              /* last line in the window */
+        {
+          scroll(clientInfo->client_input_window);                    /* go up one line */
+          row = maxrow-2;                 /* stay at the last line */
+          wmove(clientInfo->client_input_window, row, col);           /* move cursor to the beginning */
+          wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to eol */
+          box(clientInfo->client_input_window, 0, 0);                 /* draw the box again */
+        }
+        //write else if compare str == bye to exit
+        else
+        {
+          row++;
+          wmove(clientInfo->client_input_window, row, col);           /* move cursor to the beginning */
+          wrefresh(clientInfo->client_input_window);
+          wprintw(clientInfo->client_input_window, "%c", word[i]);    /* display the char recv'd */
+        }
+      }
 
-       if (col++ < maxcol-2)               /* if within window */
-       {
-         // wprintw(clientInfo->client_input_window, "%c", word[i]);      /* display the char recv'd */
-       }
-       else                                /* last char pos reached */
-       {
-         col = 4;
-         if (row == maxrow-2)              /* last line in the window */
-         {
-           scroll(clientInfo->client_input_window);                    /* go up one line */
-           row = maxrow-2;                 /* stay at the last line */
-           wmove(clientInfo->client_input_window, row, col);           /* move cursor to the beginning */
-           wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to eol */
-           box(clientInfo->client_input_window, 0, 0);                 /* draw the box again */
-         }
-//write else if compare str == bye to exit
-         else
-         {
-           row++;
-           wmove(clientInfo->client_input_window, row, col);           /* move cursor to the beginning */
-           wrefresh(clientInfo->client_input_window);
-           wprintw(clientInfo->client_input_window, "%c", word[i]);    /* display the char recv'd */
-         }
-       }
-     }
-     word[i] = 0;
-     pushMessage(clientInfo, word);
-     wmove(clientInfo->client_input_window, 2, 2);           /* move cursor to the beginning */
-     wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to end of line(eol) */
+      // 80 characters limit
+      if( i >= 79 )
+      {
+        i++;
+        while((ch = mvwgetch(clientInfo->client_input_window,row, col)) != '\n')
+        {
+          fprintf(clientInfo->log, "[-- monitorInputWindow] Hit 80 characters limit ...");
+          fflush(clientInfo->log);
+          word[i] = ch;
+        }
+        break;
+      }
+    }
+    word[i] = 0;
+    pushMessage(clientInfo, word);
+    wmove(clientInfo->client_input_window, 2, 2);           /* move cursor to the beginning */
+    wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to end of line(eol) */
   }
 }
-
 
 void * open_ui(ClientInfoDef * clientInfo)
 {
