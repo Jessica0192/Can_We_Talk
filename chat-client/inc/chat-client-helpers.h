@@ -13,3 +13,4 @@
 
 void * clientIncomingThread(ClientInfoDef *clientInfo);
 void * clientOutGoingThread(ClientInfoDef *clientInfo);
+void validateSocketConn(ClientInfoDef *clientInfo, int socketReturnValue, char* msgPrefix);

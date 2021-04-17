@@ -11,6 +11,21 @@
 #include "../inc/chat-client-helpers.h"
 
 
+void validateSocketConn(ClientInfoDef *clientInfo, int socketReturnValue, char* msgPrefix)
+{
+  if (socketReturnValue <= 0) { // connection closed!
+    fprintf(clientInfo->log, "[-->> %s] - [ERROR] Unable to send reponse or connection closed.\n, msgPrefix");
+    fflush(clientInfo->log);
+    system("clear");
+    system("reset");
+    printf("[ERROR] Server cannot be connected ...\n");
+    exit(1);
+  } else {
+    fprintf(clientInfo->log, "[-->> %s] - Response sent (%d bytes).\n", msgPrefix, socketReturnValue);
+  }
+  fflush(clientInfo->log);
+}
+
 
 /*  -- Method Header Comment
 
@@ -56,34 +71,18 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   struct myMsg msg;
   for (;;) {
     // sleep(1);
-    socketResp = write(client_socket, tmpmsg, sizeof(tmpmsg));
-    if (socketResp <= 0) { // connection closed!
-      fprintf(clientInfo->log, "[-->> IncomingThread-write] - [ERROR] Unable to send reponse or connection closed.\n");
-      fflush(clientInfo->log);
-      system("clear");
-      system("reset");
-      printf("[ERROR] Server cannot be connected ...\n");
-      exit(1);
-    } else {
-      fprintf(clientInfo->log, "[-->> IncomingThread-write] - Response sent (%d bytes).\n", socketResp);
-    }
-    fflush(clientInfo->log);
-    //-----------------------------
+    validateSocketConn(
+      clientInfo,
+      write(client_socket, tmpmsg, sizeof(tmpmsg)),
+      "IncomingThread-write"
+    );
     bzero(buff, sizeof(buff));
     //to read the buffer
-    socketResp = read(client_socket, buff, sizeof(buff));
-    if (socketResp <= 0) { // connection closed!
-      fprintf(clientInfo->log, "[-->> IncomingThread-read] - [ERROR] Unable to send reponse or connection closed.\n");
-      fflush(clientInfo->log);
-      system("clear");
-      system("reset");
-      printf("[ERROR] Server cannot be connected ...\n");
-      exit(1);
-    } else {
-      fprintf(clientInfo->log, "[-->> IncomingThread-read] - Response sent (%d bytes).\n", socketResp);
-    }
-    fflush(clientInfo->log);
-    //-----------------------------
+    validateSocketConn(
+      clientInfo,
+      read(client_socket, buff, sizeof(buff)),
+      "IncomingThread-read"
+    );
     //to log the message
     fprintf(clientInfo->log, "[-->> IncomingThread] - message from server: %s\n", buff);
     fflush(clientInfo->log);
@@ -171,51 +170,57 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
       char tmpBuff[80];
       strncpy(tmpBuff, msgUISend.text, 40 + slashindex);
       tmpBuff[40 + slashindex] = 0;
-      write(client_socket, tmpBuff, 40 + slashindex);
-      fprintf(clientInfo->log, "[-->> OutgoingThread-write] first 40 chars sent: %s\n", tmpBuff);
-      // textIndex = textIndex + 40 + slashindex;
+      validateSocketConn(
+        clientInfo,
+        write(client_socket, tmpBuff, 40 + slashindex),
+        "OutgoingThread-write-first-40"
+      );
       strncpy(tmpBuff, msgUISend.text, slashindex);
       tmpBuff[slashindex]=0;
       strcat(tmpBuff, "/");
       strcat(tmpBuff, (char *)(textIndex + 40 + slashindex ));
       fprintf(clientInfo->log, "[-->> OutgoingThread-write] second 40 chars sent: %s\n", tmpBuff);
-      socketResp = write(client_socket, tmpBuff, textsize - 40);
+      validateSocketConn(
+        clientInfo,
+        write(client_socket, tmpBuff, textsize - 40),
+        "OutgoingThread-write-second-40"
+      );
       fflush(clientInfo->log);
     }
     else
     {
-      socketResp = write(client_socket, msgUISend.text, sizeof(msgUISend.text));
-    }
 
-    if (socketResp <= 0) { // connection closed!
-      fprintf(clientInfo->log, "[-->> OutgoingThread-write] - [ERROR] Unable to send reponse or connection closed.\n");
-      fflush(clientInfo->log);
-      system("clear");
-      system("reset");
-      printf("[ERROR] Server cannot be connected ...\n");
-      exit(1);
-    } else {
-      fprintf(clientInfo->log, "[-->> OutgoingThread-write] - Response sent (%d bytes).\n", socketResp);
+      int tmpIndex = 0;
+      bool letsOverwrite = false;
+      while (tmpIndex < 40 + slashindex)
+      {
+        if(msgUISend.text[tmpIndex] == 0 )
+        {
+          msgUISend.text[tmpIndex] = ' ';
+          letsOverwrite = true;
+        }
+        else if (letsOverwrite)
+        {
+          msgUISend.text[tmpIndex] = ' ';
+        }
+        tmpIndex++;
+      }
+      msgUISend.text[tmpIndex] = 0;
+
+      validateSocketConn(
+        clientInfo,
+        write(client_socket, msgUISend.text, sizeof(msgUISend.text)),
+        "OutgoingThread-write"
+      );
     }
-    fflush(clientInfo->log);
-    //-----------------------------
     //to log the message
     fprintf(clientInfo->log, "[-->> OutgoingThread] - message send to server: %s\n", msgUISend.text);
     fflush(clientInfo->log);
-    socketResp =read(client_socket, buff, sizeof(buff));
-    if (socketResp <= 0){
-      fprintf(clientInfo->log, "[-->> OutgoingThread-read] - [ERROR] Unable to send reponse or connection closed.\n");
-      fflush(clientInfo->log);
-      system("clear");
-      system("reset");
-      printf("[ERROR] Server cannot be connected ...\n");
-      exit(1);
-    } else {
-      fprintf(clientInfo->log, "[-->> OutgoingThread-read] - Response sent (%d bytes).\n", socketResp);
-    }
-    fflush(clientInfo->log);
-    //-----------------------------
-    // sleep(10);
+    validateSocketConn(
+      clientInfo,
+      read(client_socket, buff, sizeof(buff)),
+      "OutgoingThread-read"
+    );
   }
 
 	// close the socket
