@@ -39,25 +39,50 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
   struct myMsg xx;
   int msg_size = sizeof(xx) - sizeof(long);
   int j = 1;
+  int newIndex = 2;
 
   while (true)
   {
 
-    if (j > 10)
-    {
-	scroll(clientInfo->client_msg_window); 
-	j = 1;
-    }
-
-      //to update the curser
+   //if (j > 10)
+   //{
+      //wmove(clientInfo->client_msg_window, index - 9, 1);
+      //wclrtoeol(clientInfo->client_msg_window);
+      //newIndex = newIndex + 1;
+      //wmove(clientInfo->client_input_window, newIndex, 1);
+      //newIndex = newIndex + 1;
+   //}
 
     int rtn = msgrcv(clientInfo->msgIdUIRec, &xx, msg_size, 1, 0);
     if( rtn  != -1 )
     {
-      wmove(clientInfo->client_msg_window, index + 2, 1);
-      wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
-      index = index + 1;
-      wrefresh(clientInfo->client_msg_window);
+      if (j <= 10)
+      {
+	//to update the curser
+        wmove(clientInfo->client_msg_window, index + 2, 1);
+        wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
+        index = index + 1;
+        wrefresh(clientInfo->client_msg_window);
+      }
+      if (j > 10)
+      {
+        wmove(clientInfo->client_msg_window, newIndex, 1);
+        wclrtoeol(clientInfo->client_msg_window);
+        wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
+        newIndex = newIndex + 1;
+        wrefresh(clientInfo->client_msg_window);
+        
+	if (j > 19)
+        {
+	   j = 1;
+	   index = 0;
+        }
+      }
+      //to update the curser
+     // wmove(clientInfo->client_msg_window, index + 2, 1);
+      //wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
+      //index = index + 1;
+     // wrefresh(clientInfo->client_msg_window);
     }
     else
     {
