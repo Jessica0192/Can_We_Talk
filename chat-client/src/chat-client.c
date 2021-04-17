@@ -29,7 +29,7 @@ int main(int argc,char* argv[])
     clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
     clientInfo.msgIdUIRec = -1;
     clientInfo.msgIdUISnd = -1;
-    // open log 
+    // open log
     clientInfo.log = fopen("x2.log", "a+");
 
     // Parse input args
@@ -152,6 +152,8 @@ int main(int argc,char* argv[])
 			//printf ("[CLIENT] : clientIncomingThread FAILED\n");
 			fflush(stdout);
 		}
+
+    sleep(1);
 
 		// Create and launch clientOutGoingThread
 		if (pthread_create(&(clientInfo.pOut), NULL, clientOutGoingThread, &clientInfo))
