@@ -179,10 +179,30 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
       tmpBuff[slashindex]=0;
       strcat(tmpBuff, "/");
       strcat(tmpBuff, (char *)(textIndex + 40 + slashindex ));
+
+
+      int tmpIndex = 0;
+      bool letsOverwrite = false;
+      while (tmpIndex < 40 + slashindex)
+      {
+        if(tmpBuff[tmpIndex] == 0 )
+        {
+          tmpBuff[tmpIndex] = ' ';
+          letsOverwrite = true;
+        }
+        else if (letsOverwrite)
+        {
+          tmpBuff[tmpIndex] = ' ';
+        }
+        tmpIndex++;
+      }
+      tmpBuff[tmpIndex] = 0;
+
+
       fprintf(clientInfo->log, "[-->> OutgoingThread-write] second 40 chars sent: %s\n", tmpBuff);
       validateSocketConn(
         clientInfo,
-        write(client_socket, tmpBuff, textsize - 40),
+        write(client_socket, tmpBuff, sizeof(tmpBuff)),
         "OutgoingThread-write-second-40"
       );
       fflush(clientInfo->log);
