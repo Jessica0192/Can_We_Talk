@@ -22,16 +22,14 @@ int main(int argc,char* argv[])
     ClientInfoDef clientInfo;
     clientInfo.type = 312;
 
-    //?????????????????????????????????????????????
+    // set up client socket
     memset (&clientInfo.servaddr, 0, sizeof (clientInfo.servaddr));
-    //?????????????????????????????????????????????????
     clientInfo.servaddr.sin_family = AF_INET;
     clientInfo.servaddr.sin_port = htons(PORT);
-
-    //to get the message size
     clientInfo.msg_size = sizeof(clientInfo.srvMsgUIRec) - sizeof(long);
     clientInfo.msgIdUIRec = -1;
     clientInfo.msgIdUISnd = -1;
+    // open log 
     clientInfo.log = fopen("x2.log", "a+");
 
     // Parse input args
@@ -81,7 +79,7 @@ int main(int argc,char* argv[])
         fprintf(clientInfo.log, "[Main] Server is given as argv[%d]: %s \n",counter,argv[counter]);
         strncpy(clientInfo.server, argTmp, strlen(argTmp)+1);
         fprintf(clientInfo.log, "[Main] The server is : %s (length=%d/%d)\n", clientInfo.server, strlen(clientInfo.server), strlen(argTmp));
-        //ot set the flag 
+        //to set the flag
         serverIsGiven = true;
         clientInfo.servaddr.sin_addr.s_addr = inet_addr(clientInfo.server);
       }

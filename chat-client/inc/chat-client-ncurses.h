@@ -1,15 +1,11 @@
-// #include <stdio.h>
-// #include <ncurses.h>
-// #include <unistd.h>
-// #include <stdbool.h>
+/*
+*	FILE: chat-client-ncurses.h
+*	PROJECT: A3
+*	PROGRAMMER: Suka Sun, Hoda Akrami
+*	FIRST VERSION: 2021-03-20
+*	DESCRIPTION: This file includes the function definition for the chat-client-ncurses.c
+*/
 
-
-// #include <netdb.h>
-// #include <stdlib.h>
-// #include <string.h>
-// #include <sys/socket.h>
-// #include <pthread.h>
-// #include <arpa/inet.h>
 
 #include "../inc/common.h"
 

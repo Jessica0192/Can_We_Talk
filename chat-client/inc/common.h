@@ -1,4 +1,11 @@
-
+/*
+*	FILE: common.h
+*	PROJECT: A3
+*	PROGRAMMER: Suka Sun, Hoda Akrami
+*	FIRST VERSION: 2021-03-20
+*	DESCRIPTION: This file includes the definitions shared between
+*              the chat-client.c and chat-client-ncurses.c
+*/
 
 #include <ncurses.h>
 #include <netdb.h>
