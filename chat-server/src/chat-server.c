@@ -17,10 +17,21 @@
 #include <signal.h>
 #include <stdbool.h>
 
+
+/*
+* FILE          : chat-server.c
+* PROJECT       : SENG2030 - Assignment #4
+* PROGRAMMER    : Maria Malinina
+* FIRST VERSION : 2020-03-27
+* DESCRIPTION   :
+* This project contains the functionality of a chat server.
+*/
+
 #define PORT 5000
 #define max_num_clients 10
 void *socketThread(void *clientSocket);
 void sigIntHandler(int signal);
+char *truncString(char *str, int pos);
 typedef struct
 {
   // the following is a requriement of UNIX/Linux
@@ -141,6 +152,7 @@ int main(void)
     numClients++;
 
 
+
     printf("[SERVER] : received a packet from CLIENT-%02d\n", numClients);
     fflush(stdout);
 
@@ -159,6 +171,7 @@ int main(void)
       fflush(stdout);
       return 5;
     }
+
     printf("[SERVER] : pthread_create() successful for CLIENT-%02d\n", numClients);
     fflush(stdout);
 
@@ -218,20 +231,73 @@ void *socketThread(void *clientSocket){
         {
 
           printf("numCleints: %d\n", numClients);
-          sprintf (message, "[%d] [%s] << %s (%02d:%02d:%02d)", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+          
+
+	if (strlen(parsed_msg) >40)
+	{
+		truncString(parsed_msg, 40);
+	}
 
           for (int i = 0; i < numClients; i++)
           {
+		serv_th->userID[i] = (char *) malloc(100);
+	
+
+		if (strcmp(serv_th->userID[i], parsed_userID)!=0)
             // if (serv_th->IPaddress[i] != clSocket)
-            // {
-              printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+             { 
+
+
+
+	
+		printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
+
+		if (serv_th->IPaddress[i] != clSocket)
+		{
+				sprintf (message, "[%s]\t << %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
               printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		}else{
+				sprintf (message, "[%s]\t >> %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+              printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	//i++;
+		}
+              
 
               if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
               {
                 printf("Socket write failed\n");
               }
-            // }
+             }
+	     else{
+
+		
+			printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
+
+		if (serv_th->IPaddress[i] != clSocket)
+		{
+				sprintf (message, " [%s] << %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+              printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		}else{
+				sprintf (message, " [%s] >> %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
+              printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+	//i++;
+		}
+              
+
+              if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
+              {
+                printf("Socket write failed\n");
+              }
+
+			
+		}
+
+
+		
           }
         }
       }
@@ -290,6 +356,21 @@ void *socketThread(void *clientSocket){
   return 0;
 }
 
+
+
+char *truncString(char *str, int pos)
+{
+    size_t len = strlen(str);
+
+    if (len > abs(pos)) {
+        if (pos > 0)
+            str = str + pos;
+        else
+            str[len + pos] = 0;
+    }
+
+    return str;
+}
 
 
 /*
