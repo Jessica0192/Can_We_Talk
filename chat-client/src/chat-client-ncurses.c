@@ -217,8 +217,19 @@ void * monitorInputWindow(ClientInfoDef* clientInfo)
     }
     word[i] = 0;
     pushMessage(clientInfo, word);
-    wmove(clientInfo->client_input_window, 2, 2);           /* move cursor to the beginning */
-    wclrtoeol(clientInfo->client_input_window);                 /* clear from cursor to end of line(eol) */
+
+   for (int k = 2; k < maxcol-2; k++)
+   {
+      //move the curser to every line
+      wmove(clientInfo->client_input_window, k, 2); 
+      //to clean the line that curser point to
+      wclrtoeol(clientInfo->client_input_window);
+      wrefresh(clientInfo->client_input_window);
+   }
+   //to move the curser to the first line
+   wmove(clientInfo->client_input_window, 2, 2); 
+   box(clientInfo->client_input_window, 0, 0);
+
   }
 }
 
