@@ -4,7 +4,7 @@
 *	PROJECT: Can_We_Talk system - A4
 *	PROGRAMMER: Suka Sun, Hoda AkramiS
 *	FIRST VERSION: 2021-04-07
-*	DESCRIPTION: TBD
+*	DESCRIPTION: The main file of the chat-client application of the Can_We_Talk system.
 *
 */
 
