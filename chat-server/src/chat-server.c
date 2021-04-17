@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 
+#include "../inc/chat-server.h"
 /*
 * FILE          : chat-server.c
 * PROJECT       : SENG2030 - Assignment #4
@@ -27,30 +28,7 @@
 * This project contains the functionality of a chat server.
 */
 
-#define PORT 5000
-#define max_num_clients 10
-void *socketThread(void *clientSocket);
-void sigIntHandler(int signal);
-char *truncString(char *str, int pos);
-
-typedef struct
-{
-  // the following is a requriement of UNIX/Linux
-  long type;
-
-  int IPaddress[max_num_clients];
-  char* userID[max_num_clients];
-
-
-} serverThread;
-
-// global variable to keep count of the number of clients ...
-static int numClients;
-static int cur_IP;
-static serverThread* serv_th;
-static int global_serv_socket;
-static int counter;
-volatile pthread_t       tid[10];
+static char* client_ip;
 
 int main(void)
 {
@@ -141,7 +119,7 @@ int main(void)
     // now get it back and print it
     inet_ntop(AF_INET, &(client_addr.sin_addr), str, INET_ADDRSTRLEN);
 
-    char *client_ip = inet_ntoa(client_addr.sin_addr);
+   client_ip = inet_ntoa(client_addr.sin_addr);
     printf("-----------client_ip---------[%s]\n", client_ip);
 
     if(numClients == 1 && counter == 1)
@@ -253,11 +231,11 @@ void *socketThread(void *clientSocket){
               printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
               if (serv_th->IPaddress[i] != clSocket)
               {
-                sprintf (message, "[%s]\t << %s \t\t(%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                sprintf (message, "[%s] [%s]\t << %s \t\t(%02d:%02d:%02d)", client_ip, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
                 printf("[%d] [%s] << %s \t\t(%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
               }else{
-                sprintf (message, "[%s]\t >> %s (%02d:%02d:%02d)",  parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                sprintf (message, "[%s] [%s]\t >> %s (%02d:%02d:%02d)", client_ip, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
                 printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, parsed_userID, parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 //i++;
@@ -272,13 +250,13 @@ void *socketThread(void *clientSocket){
               printf("THE VALUES %d %d", serv_th->IPaddress[i], clSocket);
               if (serv_th->IPaddress[i] != clSocket)
               {
-                sprintf (message, " [%s] << %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                sprintf (message, "[%s] [%s] << %s (%02d:%02d:%02d)", client_ip, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-                printf("[%d] [%s] << %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("[%s] [%s] << %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
               }else{
-                sprintf (message, " [%s] >> %s (%02d:%02d:%02d)",  serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                sprintf (message, "[%s] [%s] >> %s (%02d:%02d:%02d)", client_ip, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 printf("WRITING MESSAGES!!!!!! [%d]\n", clSocket);
-                printf("[%d] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
+                printf("[%s] [%s] >> %s (%02d:%02d:%02d)\n", clSocket, serv_th->IPaddress[i], parsed_msg, tm.tm_hour, tm.tm_min, tm.tm_sec);
                 //i++;
               }
               if(serv_th->IPaddress[i] != 0 && write(serv_th->IPaddress[i], message, strlen(message)) == -1)
