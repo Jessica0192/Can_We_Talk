@@ -161,7 +161,32 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
     //to recive the message from the message queue
     int rtn = msgrcv(clientInfo->msgIdUISnd, &msgUISend, msgUISendSize, 1, 0);
     //write into the stream
-    socketResp = write(client_socket, msgUISend.text, sizeof(msgUISend.text));
+    int textsize = 0;
+    while (msgUISend.text[textsize] != '\0') textsize++;
+    int slashindex = 0;
+    while (msgUISend.text[slashindex] != '/') slashindex++;
+    char *textIndex = &msgUISend.text;
+    if ( textsize > 40 + slashindex)
+    {
+      char tmpBuff[80];
+      strncpy(tmpBuff, msgUISend.text, 40 + slashindex);
+      tmpBuff[40 + slashindex] = 0;
+      write(client_socket, tmpBuff, 40 + slashindex);
+      fprintf(clientInfo->log, "[-->> OutgoingThread-write] first 40 chars sent: %s\n", tmpBuff);
+      // textIndex = textIndex + 40 + slashindex;
+      strncpy(tmpBuff, msgUISend.text, slashindex);
+      tmpBuff[slashindex]=0;
+      strcat(tmpBuff, "/");
+      strcat(tmpBuff, (char *)(textIndex + 40 + slashindex ));
+      fprintf(clientInfo->log, "[-->> OutgoingThread-write] second 40 chars sent: %s\n", tmpBuff);
+      socketResp = write(client_socket, tmpBuff, textsize - 40);
+      fflush(clientInfo->log);
+    }
+    else
+    {
+      socketResp = write(client_socket, msgUISend.text, sizeof(msgUISend.text));
+    }
+
     if (socketResp <= 0) { // connection closed!
       fprintf(clientInfo->log, "[-->> OutgoingThread-write] - [ERROR] Unable to send reponse or connection closed.\n");
       fflush(clientInfo->log);
