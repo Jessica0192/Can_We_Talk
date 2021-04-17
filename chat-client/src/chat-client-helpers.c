@@ -51,14 +51,39 @@ void * clientIncomingThread(ClientInfoDef *clientInfo)
   char buff[MAX];
   char * tmpmsg = {"000/dummy"};
   int n;
+  int socketResp;
 
   struct myMsg msg;
   for (;;) {
     // sleep(1);
-    write(client_socket, tmpmsg, sizeof(tmpmsg));
+    socketResp = write(client_socket, tmpmsg, sizeof(tmpmsg));
+    if (socketResp <= 0) { // connection closed!
+      fprintf(clientInfo->log, "[-->> IncomingThread-write] - [ERROR] Unable to send reponse or connection closed.\n");
+      fflush(clientInfo->log);
+      system("clear");
+      system("reset");
+      printf("[ERROR] Server cannot be connected ...\n");
+      exit(1);
+    } else {
+      fprintf(clientInfo->log, "[-->> IncomingThread-write] - Response sent (%d bytes).\n", socketResp);
+    }
+    fflush(clientInfo->log);
+    //-----------------------------
     bzero(buff, sizeof(buff));
     //to read the buffer
-    read(client_socket, buff, sizeof(buff));
+    socketResp = read(client_socket, buff, sizeof(buff));
+    if (socketResp <= 0) { // connection closed!
+      fprintf(clientInfo->log, "[-->> IncomingThread-read] - [ERROR] Unable to send reponse or connection closed.\n");
+      fflush(clientInfo->log);
+      system("clear");
+      system("reset");
+      printf("[ERROR] Server cannot be connected ...\n");
+      exit(1);
+    } else {
+      fprintf(clientInfo->log, "[-->> IncomingThread-read] - Response sent (%d bytes).\n", socketResp);
+    }
+    fflush(clientInfo->log);
+    //-----------------------------
     //to log the message
     fprintf(clientInfo->log, "[-->> IncomingThread] - message from server: %s\n", buff);
     fflush(clientInfo->log);
@@ -130,16 +155,41 @@ void * clientOutGoingThread(ClientInfoDef *clientInfo)
   struct myMsg msgUISend;
   //to get the message size
   int msgUISendSize = sizeof(msgUISend) - sizeof(long);
+  int socketResp;
 
   for (;;) {
     //to recive the message from the message queue
     int rtn = msgrcv(clientInfo->msgIdUISnd, &msgUISend, msgUISendSize, 1, 0);
     //write into the stream
-    write(client_socket, msgUISend.text, sizeof(msgUISend.text));
+    socketResp = write(client_socket, msgUISend.text, sizeof(msgUISend.text));
+    if (socketResp <= 0) { // connection closed!
+      fprintf(clientInfo->log, "[-->> OutgoingThread-write] - [ERROR] Unable to send reponse or connection closed.\n");
+      fflush(clientInfo->log);
+      system("clear");
+      system("reset");
+      printf("[ERROR] Server cannot be connected ...\n");
+      exit(1);
+    } else {
+      fprintf(clientInfo->log, "[-->> OutgoingThread-write] - Response sent (%d bytes).\n", socketResp);
+    }
+    fflush(clientInfo->log);
+    //-----------------------------
     //to log the message
     fprintf(clientInfo->log, "[-->> OutgoingThread] - message send to server: %s\n", msgUISend.text);
     fflush(clientInfo->log);
-    read(client_socket, buff, sizeof(buff));
+    socketResp =read(client_socket, buff, sizeof(buff));
+    if (socketResp <= 0){
+      fprintf(clientInfo->log, "[-->> OutgoingThread-read] - [ERROR] Unable to send reponse or connection closed.\n");
+      fflush(clientInfo->log);
+      system("clear");
+      system("reset");
+      printf("[ERROR] Server cannot be connected ...\n");
+      exit(1);
+    } else {
+      fprintf(clientInfo->log, "[-->> OutgoingThread-read] - Response sent (%d bytes).\n", socketResp);
+    }
+    fflush(clientInfo->log);
+    //-----------------------------
     // sleep(10);
   }
 
