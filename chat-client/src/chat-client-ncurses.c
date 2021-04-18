@@ -58,6 +58,14 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
   int index = 0;
   struct myMsg currentMsg;
 
+  int lineCount;
+  char *charCache[10][80];
+  for (lineCount=0; lineCount<10; lineCount++)
+  {
+    charCache[lineCount][0] = 0;
+  }
+  lineCount = 0;
+
   //to get the size of the message
   int msg_size = sizeof(currentMsg) - sizeof(long);
   int j = 1;
@@ -70,21 +78,16 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
   while (true)
   {
     //to receive the message from the server
-    // fprintf(clientInfo->log, "%u:[monitorMsgWindow] - %d - Checking Message Queue\n", (unsigned)time(NULL), j);
-    // fflush(clientInfo->log);
     int rtn = msgrcv(clientInfo->msgIdUIRec, &currentMsg, msg_size, 0, IPC_NOWAIT);
-    // fprintf(clientInfo->log, "%u:[monitorMsgWindow] - %d - Message Queue response received\n", (unsigned)time(NULL), j);
-    // fflush(clientInfo->log);
 
     //to check if receiving the msg from the server was successful
     if( rtn  != -1 )
     {
       fprintf(clientInfo->log, "[monitorMsgWindow] Received MQ message\n");
       fflush(clientInfo->log);
-      //to handle display only 10 lines in the window
-      //when the number of messages are less than 10 lines
-      if (j <= 10)
+      if (lineCount < 10)
       {
+        strncpy(charCache[lineCount], currentMsg.text, sizeof(currentMsg.text));
         //to update the curser
         wmove(clientInfo->client_msg_window, index + 2, 1);
         //to print in the window
@@ -94,32 +97,35 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         //to refresh the window
         wrefresh(clientInfo->client_msg_window);
       }
-
-      //to handle display only 10 lines in the window
-      //when the number of messages are more than 10 lines
-      if (j > 10)
+      else
       {
-        //to update the curser
-        wmove(clientInfo->client_msg_window, newIndex, 1);
-        //to delete the oldest message
-        wclrtoeol(clientInfo->client_msg_window);
-        //to print in the window
-        wprintw(clientInfo->client_msg_window, "%s", currentMsg.text);
-        //to increament the index and print the message on the next line
-        newIndex = newIndex + 1;
-        //to refresh the window
-        wrefresh(clientInfo->client_msg_window);
-
-        //to refresh the variables when rewrite the lines
-        if (j > 19)
+        index = 0;
+        for (lineCount=1; lineCount<10; lineCount++)
         {
-          j = 1;
-          index = 0;
-          newIndex = 2;
-          }
+          strncpy(charCache[lineCount - 1 ], charCache[lineCount], sizeof(charCache[lineCount]));
+          fprintf(clientInfo->log, "[monitorMsgWindow] %d -> %d\n", lineCount - 1, lineCount);
+          fflush(clientInfo->log);
+          //to update the curser
+          wmove(clientInfo->client_msg_window, index + 2, 1);
+          //to print in the window
+          wprintw(clientInfo->client_msg_window, "%s", charCache[lineCount- 1]);
+          fprintf(clientInfo->log, "[monitorMsgWindow] print %d\n", lineCount - 1);
+          fflush(clientInfo->log);
+          //to increament the index and print the message on the next line
+          index = index + 1;
+        }
+        strncpy(charCache[9], currentMsg.text, sizeof(currentMsg.text));
+        //to update the curser
+        wmove(clientInfo->client_msg_window, index + 2, 1);
+        //to print in the window
+        wprintw(clientInfo->client_msg_window, "%s", charCache[lineCount-1]);
+        fprintf(clientInfo->log, "[monitorMsgWindow] print %d\n", lineCount -1);
+        fflush(clientInfo->log);
+        //to increament the index and print the message on the next line
+        index = index + 1;
+        wrefresh(clientInfo->client_msg_window);
       }
-
-      j = j + 1;
+      lineCount++;
     }
     sleep(0.5);
   }
