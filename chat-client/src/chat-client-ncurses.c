@@ -104,7 +104,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         //to delete the oldest message
         wclrtoeol(clientInfo->client_msg_window);
         //to print in the window
-        wprintw(clientInfo->client_msg_window, "[xxx.xxx.xxx.xxx]\t%s", xx.text);
+        wprintw(clientInfo->client_msg_window, "%s", xx.text);
         //to increament the index and print the message on the next line
         newIndex = newIndex + 1;
         //to refresh the window
