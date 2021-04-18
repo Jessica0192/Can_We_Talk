@@ -302,20 +302,19 @@ void *socketThread(void *clientSocket){
 
   //decrease the number of clients
   numClients--;
+  numClients--;
 
   //close the socket
   close(clSocket);
 
   timeToExit = iAmClient;
-  pthread_exit((void*)1);
 
   if (numClients == 0)
   {
+        //if the number of clients reached 0 - terminate the server
 	exit(0);
   }
 
-
-  printf ("[SERVER (Thread-%02d)] : closing socket\n", iAmClient);
   
   //decrease the client's socket
   clSocket--;
