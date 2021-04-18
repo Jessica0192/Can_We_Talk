@@ -56,10 +56,10 @@ void pushMessage(ClientInfoDef* clientInfo, char* msgtxt)
 void * monitorMsgWindow(ClientInfoDef* clientInfo)
 {
   int index = 0;
-  struct myMsg xx;
+  struct myMsg currentMsg;
 
   //to get the size of the message
-  int msg_size = sizeof(xx) - sizeof(long);
+  int msg_size = sizeof(currentMsg) - sizeof(long);
   int j = 1;
   int newIndex = 2;
 
@@ -72,7 +72,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
     //to receive the message from the server
     // fprintf(clientInfo->log, "%u:[monitorMsgWindow] - %d - Checking Message Queue\n", (unsigned)time(NULL), j);
     // fflush(clientInfo->log);
-    int rtn = msgrcv(clientInfo->msgIdUIRec, &xx, msg_size, 0, IPC_NOWAIT);
+    int rtn = msgrcv(clientInfo->msgIdUIRec, &currentMsg, msg_size, 0, IPC_NOWAIT);
     // fprintf(clientInfo->log, "%u:[monitorMsgWindow] - %d - Message Queue response received\n", (unsigned)time(NULL), j);
     // fflush(clientInfo->log);
 
@@ -88,7 +88,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         //to update the curser
         wmove(clientInfo->client_msg_window, index + 2, 1);
         //to print in the window
-        wprintw(clientInfo->client_msg_window, "%s", xx.text);
+        wprintw(clientInfo->client_msg_window, "%s", currentMsg.text);
         //to increament the index and print the message on the next line
         index = index + 1;
         //to refresh the window
@@ -104,7 +104,7 @@ void * monitorMsgWindow(ClientInfoDef* clientInfo)
         //to delete the oldest message
         wclrtoeol(clientInfo->client_msg_window);
         //to print in the window
-        wprintw(clientInfo->client_msg_window, "%s", xx.text);
+        wprintw(clientInfo->client_msg_window, "%s", currentMsg.text);
         //to increament the index and print the message on the next line
         newIndex = newIndex + 1;
         //to refresh the window
