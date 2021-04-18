@@ -1,4 +1,5 @@
 chat-client/*.log
+chat-client/*.key
 chat-client/bin/chat*
 chat-client/obj/*.o
 chat-server/bin/chat*

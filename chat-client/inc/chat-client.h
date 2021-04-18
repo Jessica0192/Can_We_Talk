@@ -7,3 +7,6 @@
 */
 
 #include "../inc/common.h"
+
+#include <time.h>
+#include <stdlib.h>

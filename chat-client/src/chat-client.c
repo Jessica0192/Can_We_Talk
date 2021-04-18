@@ -104,8 +104,20 @@ int main(int argc,char* argv[])
     }
 
 		// Create a new message queue - msg UI receive
-    system("touch mq.rec.key");
-		key_t msg_key = ftok("./mq.rec.key", 0);
+    char mqkeyfile[20];
+    srand(time(NULL));
+    int rInt = rand() % 100;
+    fprintf(clientInfo.log, "[Main] rInt=%d\n", rInt);
+
+    sprintf(mqkeyfile, "mq.rec.%d.key", rInt);
+
+    fprintf(clientInfo.log, "[Main] mqkeyfile=%s\n", mqkeyfile);
+    fflush(clientInfo.log);
+
+    FILE *fp = fopen (mqkeyfile, "w");
+    fclose (fp);
+
+		key_t msg_key = ftok(mqkeyfile, 0);
 		if(msg_key == -1)
 		{
 			//printf ("Cannot get msg_key\n");
